@@ -1,0 +1,79 @@
+name: Release swindings binary
+
+# https://github.com/raysan5/raylib/wiki/Working-on-GNU-Linux
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+  actions: write
+
+jobs:
+  build-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Download submodules
+        run: git submodule update --init --recursive
+      - name: Install zig 
+        uses: mlugg/setup-zig@v2
+        with:
+          version: 0.16.0-dev.2984+cb7d2b056
+      - name: Install build dependencies
+        run: sudo apt install libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+      - name: Cleanup cache folders
+        continue-on-error: true
+        run: |
+          set -x  # enable shell tracing (shows every command)
+          echo "ZIG_GLOBAL_CACHE_DIR=${ZIG_GLOBAL_CACHE_DIR}"
+          echo "ZIG_LOCAL_CACHE_DIR=${ZIG_LOCAL_CACHE_DIR}"
+          rm -rfv "$ZIG_GLOBAL_CACHE_DIR" || true
+          rm -rfv "$ZIG_LOCAL_CACHE_DIR" || true
+          set +x
+      - name: Build project
+        run: zig build --summary all -j1 --color off -freference-trace=0 -Doptimize=ReleaseSafe --verbose
+
+      
+      - name: Get version from tag
+        id: get_version
+        run: |
+          TAG_VERSION="${GITHUB_REF##*/}"
+          VERSION="${TAG_VERSION#v}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Make release archive structure
+        run: |
+          mkdir -p release/bin
+          cp zig-out/bin/swindings release/bin/
+
+      - name: Tarball the build
+        run: |
+          tar -czvf swindings-${{ steps.get_version.outputs.version }}-linux-x86_64.tar.gz -C release .
+
+      - name: Generate BSD SHA256 checksum
+        run: |
+          FILE=swindings-${{ steps.get_version.outputs.version }}-linux-x86_64.tar.gz
+          SUM=$(sha256sum "$FILE" | awk '{print $1}')
+          echo "SHA256 ($FILE) = $SUM" > $FILE.sha256
+
+      - name: Upload release assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            swindings-${{ steps.get_version.outputs.version }}-linux-x86_64.tar.gz
+            swindings-${{ steps.get_version.outputs.version }}-linux-x86_64.tar.gz.sha256
+
+  deploy-site:
+    needs: build-release
+    runs-on: ubuntu-latest
+    if: ${{ success() }}
+    steps:
+      - name: Trigger deploy-site workflow
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: deploy-site.yml
+          ref: ${{ github.ref }}

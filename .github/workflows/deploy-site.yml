@@ -1,0 +1,34 @@
+name: Deploy site to GitHub pages
+
+on:
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deployToGithub:
+    runs-on: ubuntu-latest
+    environment:
+      name: gh-pages
+      url: ${{ steps.deploy_to_pages.outputs.github_pages_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create directory if not exist
+        run: mkdir -p site/public
+      - name: Copy install script to public folder
+        run: cp scripts/install.sh site/public/install.sh
+      - name: Deploy to Github Pages
+        uses: skywarth/vite-github-pages-deployer@master
+        id: deploy_to_pages
+        with:
+          package_manager: yarn
+          working_path: ./site
