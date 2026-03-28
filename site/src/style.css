@@ -1,2 +1,4 @@
 @import "tailwindcss";
-
+.clicked {
+  @apply bg-slate-400 text-white;   /* Tailwind's @apply is perfect here */
+}
