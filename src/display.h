@@ -2,6 +2,7 @@
 #define DISPLAY_H
 
 #include "config.h"
-void display(const KeyMapList *kml);
+#include "theme.h"
+void display(const KeyMapList *kml, Theme *theme);
 
 #endif

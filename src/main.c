@@ -1,22 +1,37 @@
 #include "config.h"
 #include "display.h"
+#include "theme.h"
 #include <stdio.h>
 #include <stdlib.h>
+// TODO: Include error/status struct for theme.c
+// For display, for sway parsing
+
+typedef enum {
+    Success = 0,
+    ConfigError,
+
+} Error;
 
 int main(void) {
     StringList list;
     stringlist_init(&list);
+    Theme theme;
+    Error err = theme_set_from_config(&theme);
+    if (err != 0) {
+        fprintf(stderr, "Failed to set config, exit with code %u", err);
+        return err ;
+    };
 
-    char *filepath = get_sway_config_filepath();
+    char *filepath = config_get_sway_filepath();
     if (!filepath) {
         fprintf(stderr, "failed to determine sway config path\n");
-        return 1;
+        return ConfigError;
     }
 
-    if (read_file(filepath, &list) != 0) {
+    if (config_read_file(filepath, &list) != 0) {
         fprintf(stderr, "failed to read file\n");
         free(filepath);
-        return 1;
+        return ConfigError;
     }
 
     free(filepath);
@@ -29,7 +44,7 @@ int main(void) {
         return 1;
     }
 
-    display(&kml);
+    display(&kml, &theme);
     stringlist_free(&list);
 
     keymaplist_free(&kml);

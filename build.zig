@@ -1,4 +1,6 @@
 const std = @import("std");
+const zcc = @import("zig_compile_commands");
+
 
 pub fn build(b: *std.Build) !void {
 
@@ -54,5 +56,12 @@ pub fn build(b: *std.Build) !void {
     // Link system math library (libm) if available/needed
     exe.root_module.linkSystemLibrary("m", .{});
     b.installArtifact(exe);
+
+    var targets = std.ArrayList(*std.Build.Step.Compile).empty;
+    defer targets.deinit(b.allocator);
+
+    try targets.append(b.allocator, exe);
+
+    _ = zcc.createStep(b, "cdb", try targets.toOwnedSlice(b.allocator));
 
 }

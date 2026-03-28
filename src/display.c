@@ -1,6 +1,7 @@
 #include "display.h"
 #include "keyicon.h"
 #include "raylib.h"
+#include "theme.h"
 #include <ctype.h>
 #include <string.h>
 
@@ -134,7 +135,7 @@ static void draw_rows(Font font, float spacing, const KeyMapList *kml,
 
 // ── Public entry point ────────────────────────────────────────
 
-void display(const KeyMapList *kml) {
+void display(const KeyMapList *kml, Theme *theme) {
     SetConfigFlags(FLAG_WINDOW_TRANSPARENT | FLAG_WINDOW_UNDECORATED);
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "swindings");
     SetTargetFPS(60);

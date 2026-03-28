@@ -2,13 +2,19 @@
 #define CONFIG_H
 
 #include <stddef.h>
+#include "stringlist.h"
 
 static const char PATTERN[] = "bindsym";
-typedef struct {
-    char **items;
-    size_t count;
-    size_t capacity;
-} StringList;
+
+typedef enum {
+    CONFIG_SUCCESS = 0,
+    CONFIG_ERR_FILE_NOT_FOUND,
+    CONFIG_ERR_PERMISSION_DENIED,
+    CONFIG_ERR_OUT_OF_MEMORY,
+    CONFIG_ERR_READ_ERROR,
+    CONFIG_ERR_INVALID_FORMAT,
+    CONFIG_ERR_INVALID_ARGUMENT,
+} config_error_t;
 
 typedef struct {
     char *main_key;   // "mod", "Return", "q", etc.
@@ -45,12 +51,12 @@ int stringlist_append(StringList *list, const char *s);
 
 void stringlist_init(StringList *list);
 
-int read_file(const char *filepath, StringList *out);
+config_error_t config_read_file(const char *filepath, StringList *out);
 
 void stringlist_free(StringList *list);
 
 // Returns the path to the sway config file, or NULL on error.
 // Caller must free() the returned string.
-char *get_sway_config_filepath(void);
+char *config_get_sway_filepath(void);
 
 #endif
