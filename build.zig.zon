@@ -1,15 +1,14 @@
 .{
     .name = .swindings,
     .version = "0.15.1",
-    .dependencies = .{
+    .dependencies = .{ 
         .raylib = .{
             .url = "git+https://github.com/raysan5/raylib.git?ref=master#8a685877eb321fe0eaeabab7b8ec69d2f8a0064d",
             .hash = "raylib-5.6.0-dev-whq8uBI6KAXJlLk4MTZsDjDWcaW3NjhDJFdAAKdyDc57",
-        },
+        }, 
         .zig_compile_commands = .{
-            // .url = "git+https://github.com/the-argus/zig-compile-commands.git#f74e2d13e43fafab3a71e19557a0e1cfbf0f2e1b",
-            // .hash = "zig_compile_commands-0.0.1-OZg5-a3CAACM-h32Kjb1obTMqrKGs9YoDhorVZ8-LGle",
-            .path = "../../Forks/zig-compile-commands"
+            .url = "git+https://github.com/sondalex/zig-compile-commands.git#c13f0048f8cf04cca84f1691adc001123ce98d43",
+            .hash = "zig_compile_commands-0.0.1-OZg5-bvHAADAOeqOwy6BcPnWA5q73i4XCjOT20AHBkWd",
         },
     },
     .paths = .{"."},
