@@ -61,7 +61,6 @@ pub fn build(b: *std.Build) !void {
 
     try targets.append(b.allocator, exe);
 
-    // Step for generating compile_commands.json
     _ = zcc.createStep(b, "cdb", try targets.toOwnedSlice(b.allocator));
 
 }
