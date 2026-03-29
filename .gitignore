@@ -32,3 +32,4 @@ zig-out
 zig-pkg
 .zig-cache/
 *.bak
+compile_commands.json
