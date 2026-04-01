@@ -14,7 +14,7 @@ stringlist_error_t stringlist_append(StringList *list, const char *s) {
     }
     list->items[list->count] = strdup(s);
     if (!list->items[list->count])
-        return -1;
+        return STRINGLIST_ERR_ALLOC_FAILED;
     list->count++;
     return 0;
 }

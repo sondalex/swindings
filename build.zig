@@ -28,6 +28,7 @@ pub fn build(b: *std.Build) !void {
         "src/display.c",
         "src/stringlist.c",
         "src/theme.c",
+        "subprojects/tomlc17/src/tomlc17.c"
     };
 
 

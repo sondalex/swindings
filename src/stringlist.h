@@ -5,7 +5,7 @@
 
 typedef enum {
     STRINGLIST_SUCCESS = 0,
-    STRINGLIST_ERR_ALLOC_FAILED = 0,
+    STRINGLIST_ERR_ALLOC_FAILED,
     
 } stringlist_error_t;
 

@@ -18,7 +18,8 @@ int main(void) {
     theme_t theme;
     theme_error_t err = theme_load_from_config(&theme);
     if (err != THEME_SUCCESS) {
-        fprintf(stderr, "Failed to set THEME, exit with code %u", err);
+        fprintf(stderr, "Failed to set THEME: %s",
+                theme_error_str(err));
         return ThemeError;
     };
 
@@ -31,6 +32,7 @@ int main(void) {
     if (config_read_file(filepath, &list) != 0) {
         fprintf(stderr, "failed to read file\n");
         free(filepath);
+        stringlist_free(&list);
         return ConfigError;
     }
 
@@ -48,5 +50,6 @@ int main(void) {
     stringlist_free(&list);
 
     keymaplist_free(&kml);
+    theme_free(&theme);
     return 0;
 }

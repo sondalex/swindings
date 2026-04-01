@@ -147,7 +147,7 @@ config_error_t parse_key_maps(StringList *lines, KeyMapList *out) {
 
         if (keymaplist_append(out, km) != 0) {
             keymap_free(&km);
-            return -1;
+            return CONFIG_ERR_ALLOC_FAILED;
         }
         continue;
 

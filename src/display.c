@@ -43,7 +43,6 @@ static font_container_t load_system_font(int size);
 static void format_keys(const KeyMap *km, char *buf, size_t bufsize);
 static void capitalize_into(const char *src, char *buf, size_t bufsize);
 static Scroll scroll_create(int content_height, int window_height);
-static Scroll scroll_create(int content_height, int window_height);
 static void scroll_update(Scroll *s);
 static void draw_top(theme_color_t text_color, Font font, float spacing,
                      float y);

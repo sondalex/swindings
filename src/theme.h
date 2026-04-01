@@ -58,6 +58,7 @@ typedef struct {
  *   - NULL if the HOME environment variable is not set or if allocation fails.
  */
 char *theme_get_config_filepath(void);
+const char *theme_error_str(theme_error_t err);
 theme_result_t theme_load(const char *filepath);
 theme_error_t theme_load_from_config(theme_t *theme);
 void theme_free(theme_t *theme);

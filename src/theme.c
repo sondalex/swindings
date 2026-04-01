@@ -1,36 +1,40 @@
 #include "theme.h"
 #include "tomlc17.h"
+#include <errno.h>
+#include <libgen.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #define DEFAULT_ALPHA 180
 
+static theme_error_t create_file(const char *filepath, bool create_dir);
+static bool file_exists(const char *filepath);
+static theme_color_t parse_hex_color(const char *hex_str);
+static void color_init_with_defaults(theme_color_t *color);
+static theme_color_t color_new_with_defaults(void);
+static void font_init_with_defaults(theme_font_t *font);
+static theme_font_t font_new_with_defaults(void);
+static void theme_layer_free_strings(theme_layer_t *layer);
+static theme_error_t
+theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
+                 const char *bg_color_key, const char *bg_alpha_key,
+                 const char *font_size_key, const char *font_file_key);
+static theme_error_t theme_toml_parse_global(const toml_result_t *toml,
+                                             theme_layer_t *layer);
+static theme_error_t theme_toml_parse_top(const toml_result_t *toml,
+                                          theme_layer_t *layer);
+static theme_error_t theme_toml_parse_body(const toml_result_t *toml,
+                                           theme_layer_t *layer);
+static theme_error_t theme_toml_parse_bottom(const toml_result_t *toml,
+                                             theme_layer_t *layer);
+static void theme_layer_merge(theme_layer_t *dest, const theme_layer_t *src);
+
 static bool file_exists(const char *filepath) {
     return (bool)(access(filepath, F_OK) == 0);
-}
-
-char *theme_get_config_filepath(void) {
-    const char *home = getenv("HOME");
-    if (!home)
-        return NULL;
-
-    const char *suffix = "/.config/swindings/config.toml";
-
-    size_t len_home = strlen(home);
-    int trim = (len_home > 0 && home[len_home - 1] == '/');
-
-    size_t total_len = len_home - trim + strlen(suffix) + 1;
-
-    char *path = malloc(total_len);
-    if (!path)
-        return NULL;
-
-    snprintf(path, total_len, "%.*s%s", (int)(len_home - trim), home, suffix);
-
-    return path;
 }
 
 static theme_color_t parse_hex_color(const char *hex_str) {
@@ -64,7 +68,51 @@ static theme_color_t parse_hex_color(const char *hex_str) {
     return c;
 }
 
-theme_error_t create_file(const char *filepath) {
+static char *get_directory(const char *filepath) {
+    if (!filepath || !*filepath) {
+        return NULL;
+    }
+    char *copy = strdup(filepath);
+    if (!copy)
+        return NULL;
+    dirname(copy);
+    return copy;
+}
+
+static theme_error_t make_dir(const char *dir) {
+    mode_t old_mode = umask(0);
+    if (mkdir(dir, 0755) != 0) {
+        if (errno != EEXIST) { // "already exists" is usually OK
+            umask(old_mode);
+            return THEME_IO_ERROR;
+        }
+    }
+    umask(old_mode);
+    return THEME_SUCCESS;
+}
+
+static theme_error_t create_file(const char *filepath, bool create_dir) {
+    if (!filepath || !*filepath) {
+        return THEME_IO_ERROR;
+    }
+
+    if (create_dir) {
+        char *dir = get_directory(filepath);
+        if (!dir) {
+            return THEME_IO_ERROR;
+        }
+
+        if (!file_exists(dir)) {
+            theme_error_t err = make_dir(dir);
+            free(dir);
+            if (err != THEME_SUCCESS) {
+                return err;
+            }
+        } else {
+            free(dir);
+        }
+    }
+
     FILE *fd = fopen(filepath, "w");
     if (!fd) {
         return THEME_IO_ERROR;
@@ -165,20 +213,20 @@ static theme_error_t theme_toml_parse_global(const toml_result_t *toml,
                             "theme.background.alpha", "theme.font.size",
                             "theme.font.file");
 }
-static theme_error_t theme_toml_parse_top(toml_result_t *toml,
+static theme_error_t theme_toml_parse_top(const toml_result_t *toml,
                                           theme_layer_t *layer) {
     return theme_toml_parse(toml, layer, "theme.top.background.color",
                             "theme.top.background.alpha", "theme.top.font.size",
                             "theme.top.font.file");
 }
-static theme_error_t theme_toml_parse_body(toml_result_t *toml,
+static theme_error_t theme_toml_parse_body(const toml_result_t *toml,
                                            theme_layer_t *layer) {
     return theme_toml_parse(toml, layer, "theme.body.background.color",
                             "theme.body.background.alpha",
                             "theme.body.font.size", "theme.body.font.file");
 }
 
-static theme_error_t theme_toml_parse_bottom(toml_result_t *toml,
+static theme_error_t theme_toml_parse_bottom(const toml_result_t *toml,
                                              theme_layer_t *layer) {
 
     return theme_toml_parse(toml, layer, "theme.bottom.background.color",
@@ -195,7 +243,8 @@ static void theme_layer_merge(theme_layer_t *dest, const theme_layer_t *src) {
         src->background.color.b) {
         dest->background.color = src->background.color;
     }
-    if (src->background.alpha != DEFAULT_ALPHA) {
+    // HACK: Don't override if src alpha is 0. It would be not visible.
+    if (src->background.alpha) {
         dest->background.alpha = src->background.alpha;
     }
     if (src->font.size > 0.0f) {
@@ -207,6 +256,21 @@ static void theme_layer_merge(theme_layer_t *dest, const theme_layer_t *src) {
         free(dest->font.file);
         dest->font.file = strdup(src->font.file);
     }
+}
+const char *theme_error_str(theme_error_t err) {
+    switch (err) {
+    case THEME_SUCCESS:
+        return "success";
+    case THEME_IO_ERROR:
+        return "could not read/write config file";
+    case THEME_ALLOC_FAILED:
+        return "memory allocation failed";
+    case THEME_PARSING_ERROR:
+        return "failed to parse config TOML";
+    case THEME_CONFIG_NOT_FOUND:
+        "return file path could not be determined (HOME not set?)";
+    }
+    return "unknown error";
 }
 
 theme_result_t theme_load(const char *filepath) {
@@ -265,6 +329,27 @@ void theme_free(theme_t *theme) {
     theme_layer_free_strings(&theme->bottom);
 }
 
+char *theme_get_config_filepath(void) {
+    const char *home = getenv("HOME");
+    if (!home)
+        return NULL;
+
+    const char *suffix = "/.config/swindings/config.toml";
+
+    size_t len_home = strlen(home);
+    int trim = (len_home > 0 && home[len_home - 1] == '/');
+
+    size_t total_len = len_home - trim + strlen(suffix) + 1;
+
+    char *path = malloc(total_len);
+    if (!path)
+        return NULL;
+
+    snprintf(path, total_len, "%.*s%s", (int)(len_home - trim), home, suffix);
+
+    return path;
+}
+
 theme_error_t theme_load_from_config(theme_t *theme) {
     char *filepath = theme_get_config_filepath();
     if (!filepath) {
@@ -272,7 +357,8 @@ theme_error_t theme_load_from_config(theme_t *theme) {
     }
 
     if (!file_exists(filepath)) {
-        theme_error_t err = create_file(filepath);
+        theme_error_t err = create_file(filepath, true);
+
         if (err != THEME_SUCCESS) {
             free(filepath);
             return err;
