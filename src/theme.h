@@ -14,13 +14,17 @@ typedef struct {
 
 typedef struct {
     theme_color_t color;
-    float alpha; // 0.0–1.0, only meaningful if has_alpha == true or global
+    float alpha;      // 0.0–1.0, only meaningful if has_alpha == true or global
+    bool has_color;   // true = explicitly set in TOML
+    bool has_alpha;   // true = explicitly set in TOML
 } theme_background_t;
 
 typedef struct {
-    float size; // > 0.0 = specified, else inherit
-    char *file; // NULL = no custom file (use family or system)
+    float size;          // > 0.0 = specified, else inherit
+    char *file;          // NULL = no custom file (use family or system)
     theme_color_t color;
+    bool has_size;       // true = explicitly set in TOML
+    bool has_color;      // true = explicitly set in TOML
 } theme_font_t;
 
 typedef struct {

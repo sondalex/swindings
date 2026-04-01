@@ -186,16 +186,17 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
 
     theme_color_t color = layer->background.color;
     theme_font_t font = layer->font;
-    font.file = NULL; // don't alias the pointer; will be set from TOML
 
     if (bg_color.type == TOML_STRING) {
         color = parse_hex_color(bg_color.u.str.ptr);
+        layer->background.has_color = true;
     } else if (bg_color.type != TOML_UNKNOWN) {
         return THEME_PARSING_ERROR;
     }
 
     if (bg_alpha.type == TOML_FP64) {
         layer->background.alpha = (float)bg_alpha.u.fp64;
+        layer->background.has_alpha = true;
 
         if (!color.has_alpha) {
             color.a = (uint8_t)(layer->background.alpha * 255.0f + 0.5f);
@@ -207,6 +208,7 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
 
     if (font_size.type == TOML_FP64) {
         font.size = (float)font_size.u.fp64;
+        font.has_size = true;
     } else if (font_size.type != TOML_UNKNOWN) {
         return THEME_PARSING_ERROR;
     }
@@ -221,6 +223,7 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
 
     if (font_color.type == TOML_STRING) {
         font.color = parse_hex_color(font_color.u.str.ptr);
+        font.has_color = true;
     } else if (font_color.type != TOML_UNKNOWN) {
         return THEME_PARSING_ERROR;
     }
@@ -263,22 +266,17 @@ static theme_error_t theme_toml_parse_bottom(const toml_result_t *toml,
                             "theme.bottom.font.color");
 }
 
-// Merge src into dest. Fields that are "set" in src override dest.
+// Merge src into dest. Only fields explicitly set in src override dest.
 static void theme_layer_merge(theme_layer_t *dest, const theme_layer_t *src) {
     if (!dest || !src)
         return;
 
-    if (src->background.color.r || src->background.color.g ||
-        src->background.color.b) {
+    if (src->background.has_color)
         dest->background.color = src->background.color;
-    }
-    // HACK: Don't override if src alpha is 0. It would be not visible.
-    if (src->background.alpha) {
+    if (src->background.has_alpha)
         dest->background.alpha = src->background.alpha;
-    }
-    if (src->font.size > 0.0f) {
+    if (src->font.has_size)
         dest->font.size = src->font.size;
-    }
 
     // For strings: always duplicate (ownership transfer)
     if (src->font.file) {
@@ -286,9 +284,8 @@ static void theme_layer_merge(theme_layer_t *dest, const theme_layer_t *src) {
         dest->font.file = strdup(src->font.file);
     }
 
-    if (src->font.color.r || src->font.color.g || src->font.color.b) {
+    if (src->font.has_color)
         dest->font.color = src->font.color;
-    }
 }
 const char *theme_error_str(theme_error_t err) {
     switch (err) {

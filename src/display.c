@@ -8,7 +8,6 @@
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
-#define FONT_SIZE 14
 #define ROW_HEIGHT 22
 #define COL_KEYS 20
 #define COL_DESC 400
@@ -46,11 +45,12 @@ static void capitalize_into(const char *src, char *buf, size_t bufsize);
 static Scroll scroll_create(int content_height, int window_height);
 static void scroll_update(Scroll *s);
 static void draw_top(theme_color_t color, theme_color_t text_color, Font font,
-                     float spacing);
-static void draw_row(theme_color_t text_color, Font font, float spacing,
-                     const KeyMap *km, float y);
+                     float font_size, float spacing);
+static void draw_row(theme_color_t text_color, Font font, float font_size,
+                     float spacing, const KeyMap *km, float y);
 static void draw_body(theme_color_t color, theme_color_t text_color, Font font,
-                      float spacing, const KeyMapList *kml, float offset_y);
+                      float font_size, float spacing, const KeyMapList *kml,
+                      float offset_y);
 
 static font_container_t load_font_from_paths(const StringList *paths,
                                              int size) {
@@ -165,33 +165,34 @@ static Color to_raylib_color(theme_color_t color) {
 }
 
 static void draw_top(theme_color_t color, theme_color_t text_color, Font font,
-                     float spacing) {
+                     float font_size, float spacing) {
     Color tcolor = to_raylib_color(text_color);
     DrawRectangle(0, 0, WINDOW_WIDTH, TOP_SECTION_HEIGHT,
                   to_raylib_color(color));
 
-    DrawTextEx(font, "Keybinding", (Vector2){COL_KEYS, PADDING}, FONT_SIZE,
+    DrawTextEx(font, "Keybinding", (Vector2){COL_KEYS, PADDING}, font_size,
                spacing, tcolor);
-    DrawTextEx(font, "Action", (Vector2){COL_DESC, PADDING}, FONT_SIZE, spacing,
+    DrawTextEx(font, "Action", (Vector2){COL_DESC, PADDING}, font_size, spacing,
                tcolor);
     DrawLine(COL_KEYS, TOP_SECTION_HEIGHT, WINDOW_WIDTH - COL_KEYS,
              TOP_SECTION_HEIGHT, COLOR_LINE);
 }
 
-static void draw_row(theme_color_t text_color, Font font, float spacing,
-                     const KeyMap *km, float y) {
+static void draw_row(theme_color_t text_color, Font font, float font_size,
+                     float spacing, const KeyMap *km, float y) {
     char keybuf[256];
     char descbuf[256];
 
     format_keys(km, keybuf, sizeof(keybuf));
     capitalize_into(km->description, descbuf, sizeof(descbuf));
     Color tc = to_raylib_color(text_color);
-    DrawTextEx(font, keybuf, (Vector2){COL_KEYS, y}, FONT_SIZE, spacing, tc);
-    DrawTextEx(font, descbuf, (Vector2){COL_DESC, y}, FONT_SIZE, spacing, tc);
+    DrawTextEx(font, keybuf, (Vector2){COL_KEYS, y}, font_size, spacing, tc);
+    DrawTextEx(font, descbuf, (Vector2){COL_DESC, y}, font_size, spacing, tc);
 }
 
 static void draw_body(theme_color_t color, theme_color_t text_color, Font font,
-                      float spacing, const KeyMapList *kml, float offset_y) {
+                      float font_size, float spacing, const KeyMapList *kml,
+                      float offset_y) {
     DrawRectangle(0, TOP_SECTION_HEIGHT, WINDOW_WIDTH,
                   WINDOW_HEIGHT - TOP_SECTION_HEIGHT, to_raylib_color(color));
     float y = offset_y;
@@ -203,7 +204,7 @@ static void draw_body(theme_color_t color, theme_color_t text_color, Font font,
         }
         if (y > WINDOW_HEIGHT)
             break;
-        draw_row(text_color, font, spacing, &kml->items[i], y);
+        draw_row(text_color, font, font_size, spacing, &kml->items[i], y);
         y += ROW_HEIGHT;
     }
 }
@@ -229,10 +230,11 @@ void display(const KeyMapList *kml, const theme_t *theme) {
         ClearBackground(BLANK);
 
         draw_top(theme->top.background.color, theme->top.font.color, top_font,
-                 spacing);
+                 theme->top.font.size, spacing);
 
         draw_body(theme->body.background.color, theme->body.font.color,
-                  body_font, spacing, kml, TOP_SECTION_HEIGHT + scroll.y);
+                  body_font, theme->body.font.size, spacing, kml,
+                  TOP_SECTION_HEIGHT + scroll.y);
         EndDrawing();
     }
     UnloadFont(top_font);
