@@ -3,6 +3,20 @@
 
 #include "config.h"
 #include "theme.h"
-void display(const KeyMapList *kml, Theme *theme);
+
+typedef struct {
+    float y;
+    float min;
+} Scroll;
+
+typedef enum {
+    DISPLAY_SUCCESS = 0,
+    DISPLAY_FONT_CONVERSION_ERROR,
+    DISPLAY_FONT_LOAD_ERROR,
+    DISPLAY_STRINGLIST_UNINITIALIZED,
+
+} DisplayError;
+
+void display(const KeyMapList *kml, const theme_t *theme);
 
 #endif

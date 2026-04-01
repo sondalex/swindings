@@ -14,6 +14,7 @@ typedef enum {
     CONFIG_ERR_READ_ERROR,
     CONFIG_ERR_INVALID_FORMAT,
     CONFIG_ERR_INVALID_ARGUMENT,
+    CONFIG_ERR_ALLOC_FAILED,
 } config_error_t;
 
 typedef struct {
@@ -34,12 +35,12 @@ typedef struct {
 // "bindsym $mod+Shift+h move left"
 //          ^^^^^^^^^^^  ^^^^^^^^^
 //          keys         description
-int parse_key_maps(StringList *list, KeyMapList *out);
+config_error_t parse_key_maps(StringList *list, KeyMapList *out);
 
 void keymaplist_init(KeyMapList *list);
 
 // Appends a KeyMap to the list. Returns 0 on success, -1 on error.
-int keymaplist_append(KeyMapList *list, KeyMap km);
+config_error_t keymaplist_append(KeyMapList *list, KeyMap km);
 
 // Frees all memory owned by the list and resets it to empty.
 void keymaplist_free(KeyMapList *list);
@@ -47,13 +48,8 @@ void keymaplist_free(KeyMapList *list);
 // Frees all memory owned by the KeyMap.
 void keymap_free(KeyMap *km);
 
-int stringlist_append(StringList *list, const char *s);
-
-void stringlist_init(StringList *list);
 
 config_error_t config_read_file(const char *filepath, StringList *out);
-
-void stringlist_free(StringList *list);
 
 // Returns the path to the sway config file, or NULL on error.
 // Caller must free() the returned string.

@@ -21,16 +21,16 @@ pub fn build(b: *std.Build) !void {
     });
     const raylib = raylib_dep.artifact("raylib");
 
-    // Gather all your C source files
     const src_files = [_][]const u8{
         "src/main.c",
         "src/config.c",
         "src/keyicon.c",
         "src/display.c",
+        "src/stringlist.c",
+        "src/theme.c",
     };
 
 
-    // Create the executable from C files
     const exe = b.addExecutable(.{
         .name = "swindings",
         .root_module = b.createModule(.{
@@ -45,15 +45,13 @@ pub fn build(b: *std.Build) !void {
     });
     
 
-    // Set include dirs: your sources, raylib src, raygui src
     exe.root_module.addIncludePath(b.path("src"));
     exe.root_module.addIncludePath(b.path("subprojects/raygui/src"));
     exe.root_module.addIncludePath(b.path("subprojects/asprintf"));
+    exe.root_module.addIncludePath(b.path("subprojects/tomlc17/src"));
 
-    // Link with raylib static library
     exe.root_module.linkLibrary(raylib);
 
-    // Link system math library (libm) if available/needed
     exe.root_module.linkSystemLibrary("m", .{});
     b.installArtifact(exe);
 
@@ -62,6 +60,7 @@ pub fn build(b: *std.Build) !void {
 
     try targets.append(b.allocator, exe);
 
+    // Step for generating compile_commands.json
     _ = zcc.createStep(b, "cdb", try targets.toOwnedSlice(b.allocator));
 
 }

@@ -4,6 +4,7 @@ build/
 subprojects/*/
 !subprojects/raygui/
 !subprojects/asprintf/
+!subprojects/tomlc17/
 !subprojects/packagefiles/
 logs
 *.log

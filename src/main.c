@@ -9,17 +9,17 @@
 typedef enum {
     Success = 0,
     ConfigError,
-
+    ThemeError,
 } Error;
 
 int main(void) {
     StringList list;
     stringlist_init(&list);
-    Theme theme;
-    Error err = theme_set_from_config(&theme);
-    if (err != 0) {
-        fprintf(stderr, "Failed to set config, exit with code %u", err);
-        return err ;
+    theme_t theme;
+    theme_error_t err = theme_load_from_config(&theme);
+    if (err != THEME_SUCCESS) {
+        fprintf(stderr, "Failed to set THEME, exit with code %u", err);
+        return ThemeError;
     };
 
     char *filepath = config_get_sway_filepath();

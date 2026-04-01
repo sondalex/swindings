@@ -4,3 +4,6 @@
 [submodule "subprojects/asprintf"]
 	path = subprojects/asprintf
 	url = https://github.com/Neved4/asprintf.git
+[submodule "subprojects/tomlc17"]
+	path = subprojects/tomlc17
+	url = https://github.com/cktan/tomlc17.git

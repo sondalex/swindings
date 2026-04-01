@@ -1,12 +1,6 @@
 #include "keyicon.h"
 #include <string.h>
 
-typedef struct {
-    const char *name;
-    const char *symbol;
-    int codepoint;
-} KeySymbol;
-
 static const KeySymbol key_symbols[] = {
     {"Shift", "⇧", 0x21E7},     {"Ctrl", "⌃", 0x2303},   {"Alt", "⌥", 0x2325},
     {"Return", "⏎", 0x23CE},    {"Escape", "⎋", 0x238B}, {"Tab", "⇥", 0x21E5},

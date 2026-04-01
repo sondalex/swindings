@@ -62,17 +62,17 @@ void keymaplist_init(KeyMapList *list) {
     list->capacity = 0;
 }
 
-int keymaplist_append(KeyMapList *list, KeyMap km) {
+config_error_t keymaplist_append(KeyMapList *list, KeyMap km) {
     if (list->count == list->capacity) {
         size_t new_cap = list->capacity ? list->capacity * 2 : 8;
         KeyMap *tmp = realloc(list->items, new_cap * sizeof(*tmp));
         if (!tmp)
-            return -1;
+            return CONFIG_ERR_ALLOC_FAILED;
         list->items = tmp;
         list->capacity = new_cap;
     }
     list->items[list->count++] = km;
-    return 0;
+    return CONFIG_SUCCESS;
 }
 
 void keymap_free(KeyMap *km) {
@@ -90,7 +90,7 @@ void keymaplist_free(KeyMapList *list) {
     keymaplist_init(list);
 }
 
-int parse_key_maps(StringList *lines, KeyMapList *out) {
+config_error_t parse_key_maps(StringList *lines, KeyMapList *out) {
     for (size_t i = 0; i < lines->count; i++) {
         char *key_combo = NULL;
         char *desc = NULL;
@@ -158,7 +158,7 @@ int parse_key_maps(StringList *lines, KeyMapList *out) {
         free(tmp);
         free(key_combo);
         free(desc);
-        return -1;
+        return CONFIG_ERR_ALLOC_FAILED;
     }
-    return 0;
+    return CONFIG_SUCCESS;
 }
