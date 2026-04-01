@@ -12,9 +12,10 @@
 #define ROW_HEIGHT 22
 #define COL_KEYS 20
 #define COL_DESC 400
+/*Padding before start of text in container */
 #define PADDING 20
+#define TOP_SECTION_HEIGHT (PADDING + ROW_HEIGHT)
 
-static const Color COLOR_BG = {20, 20, 20, 180};
 static const Color COLOR_LINE = {60, 60, 60, 255};
 
 typedef struct {
@@ -44,8 +45,7 @@ static void format_keys(const KeyMap *km, char *buf, size_t bufsize);
 static void capitalize_into(const char *src, char *buf, size_t bufsize);
 static Scroll scroll_create(int content_height, int window_height);
 static void scroll_update(Scroll *s);
-static void draw_top(theme_color_t text_color, Font font, float spacing,
-                     float y);
+static void draw_top(theme_color_t text_color, Font font, float spacing);
 static void draw_row(theme_color_t text_color, Font font, float spacing,
                      const KeyMap *km, float y);
 static void draw_body(theme_color_t text_color, Font font, float spacing,
@@ -163,16 +163,15 @@ static Color to_raylib_color(theme_color_t color) {
     return c;
 }
 
-static void draw_top(theme_color_t text_color, Font font, float spacing,
-                     float y) {
+static void draw_top(theme_color_t text_color, Font font, float spacing) {
     Color color = to_raylib_color(text_color);
 
-    DrawTextEx(font, "Keybinding", (Vector2){COL_KEYS, y}, FONT_SIZE, spacing,
+    DrawTextEx(font, "Keybinding", (Vector2){COL_KEYS, PADDING}, FONT_SIZE,
+               spacing, color);
+    DrawTextEx(font, "Action", (Vector2){COL_DESC, PADDING}, FONT_SIZE, spacing,
                color);
-    DrawTextEx(font, "Action", (Vector2){COL_DESC, y}, FONT_SIZE, spacing,
-               color);
-    DrawLine(COL_KEYS, y + FONT_SIZE + 4, WINDOW_WIDTH - COL_KEYS,
-             y + FONT_SIZE + 4, COLOR_LINE);
+    DrawLine(COL_KEYS, TOP_SECTION_HEIGHT, WINDOW_WIDTH - COL_KEYS,
+             TOP_SECTION_HEIGHT, COLOR_LINE);
 }
 
 static void draw_row(theme_color_t text_color, Font font, float spacing,
@@ -189,10 +188,10 @@ static void draw_row(theme_color_t text_color, Font font, float spacing,
 
 static void draw_body(theme_color_t text_color, Font font, float spacing,
                       const KeyMapList *kml, float offset_y) {
-    float y = PADDING + ROW_HEIGHT + 8 + offset_y;
+    float y = offset_y;
 
     for (size_t i = 0; i < kml->count; i++) {
-        if (y + ROW_HEIGHT < 0) {
+        if (y + ROW_HEIGHT < (TOP_SECTION_HEIGHT + PADDING)) {
             y += ROW_HEIGHT;
             continue;
         }
@@ -222,11 +221,16 @@ void display(const KeyMapList *kml, const theme_t *theme) {
 
         BeginDrawing();
         ClearBackground(BLANK);
-        DrawRectangle(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT, COLOR_BG);
+        DrawRectangle(0, 0, WINDOW_WIDTH, TOP_SECTION_HEIGHT,
+                      to_raylib_color(theme->top.background.color));
+        DrawRectangle(0, TOP_SECTION_HEIGHT, WINDOW_WIDTH,
+                      WINDOW_HEIGHT - TOP_SECTION_HEIGHT,
+                      to_raylib_color(theme->body.background.color));
         // TODO: Move hardcoded color to theme
         theme_color_t top_color = {
             .r = 160, .g = 160, .b = 160, .a = 255, .has_alpha = true};
-        draw_top(top_color, top_font, spacing, PADDING + scroll.y);
+
+        draw_top(top_color, top_font, spacing);
 
         theme_color_t body_color = {
             .r = 130,
@@ -235,7 +239,8 @@ void display(const KeyMapList *kml, const theme_t *theme) {
             .a = 255,
             .has_alpha = true,
         };
-        draw_body(body_color, body_font, spacing, kml, scroll.y);
+        draw_body(body_color, body_font, spacing, kml,
+                  TOP_SECTION_HEIGHT + scroll.y);
         EndDrawing();
     }
     UnloadFont(top_font);
