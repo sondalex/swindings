@@ -22,7 +22,8 @@ static void theme_layer_free_strings(theme_layer_t *layer);
 static theme_error_t
 theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
                  const char *bg_color_key, const char *bg_alpha_key,
-                 const char *font_size_key, const char *font_file_key);
+                 const char *font_size_key, const char *font_file_key,
+                 const char *font_color_key);
 static theme_error_t theme_toml_parse_global(const toml_result_t *toml,
                                              theme_layer_t *layer);
 static theme_error_t theme_toml_parse_top(const toml_result_t *toml,
@@ -138,12 +139,28 @@ static theme_color_t color_new_with_defaults(void) {
 static void font_init_with_defaults(theme_font_t *font) {
     font->file = NULL;
     font->size = 14;
+    font->color = (theme_color_t){
+        .r = 130, .g = 130, .b = 130, .a = 255, .has_alpha = true};
 }
 
 static theme_font_t font_new_with_defaults(void) {
     theme_font_t font;
     font_init_with_defaults(&font);
     return font;
+}
+
+static theme_layer_t layer_new_with_defaults(void) {
+    return (theme_layer_t){
+        .background = {.color = color_new_with_defaults()},
+        .font = font_new_with_defaults(),
+    };
+}
+
+static theme_layer_t layer_new_with_top_defaults(void) {
+    theme_layer_t l = layer_new_with_defaults();
+    l.font.color = (theme_color_t){
+        .r = 160, .g = 160, .b = 160, .a = 255, .has_alpha = true};
+    return l;
 }
 
 static void theme_layer_free_strings(theme_layer_t *layer) {
@@ -156,19 +173,20 @@ static void theme_layer_free_strings(theme_layer_t *layer) {
 static theme_error_t
 theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
                  const char *bg_color_key, const char *bg_alpha_key,
-                 const char *font_size_key, const char *font_file_key) {
+                 const char *font_size_key, const char *font_file_key,
+                 const char *font_color_key) {
     if (!layer)
         return THEME_PARSING_ERROR;
-
-    *layer = (theme_layer_t){0};
 
     toml_datum_t bg_color = toml_seek(toml->toptab, bg_color_key);
     toml_datum_t bg_alpha = toml_seek(toml->toptab, bg_alpha_key);
     toml_datum_t font_size = toml_seek(toml->toptab, font_size_key);
     toml_datum_t font_file = toml_seek(toml->toptab, font_file_key);
+    toml_datum_t font_color = toml_seek(toml->toptab, font_color_key);
 
-    theme_color_t color = color_new_with_defaults();
-    theme_font_t font = font_new_with_defaults();
+    theme_color_t color = layer->background.color;
+    theme_font_t font = layer->font;
+    font.file = NULL; // don't alias the pointer; will be set from TOML
 
     if (bg_color.type == TOML_STRING) {
         color = parse_hex_color(bg_color.u.str.ptr);
@@ -201,6 +219,12 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
         return THEME_PARSING_ERROR;
     }
 
+    if (font_color.type == TOML_STRING) {
+        font.color = parse_hex_color(font_color.u.str.ptr);
+    } else if (font_color.type != TOML_UNKNOWN) {
+        return THEME_PARSING_ERROR;
+    }
+
     layer->background.color = color;
     layer->font = font;
 
@@ -209,29 +233,34 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
 
 static theme_error_t theme_toml_parse_global(const toml_result_t *toml,
                                              theme_layer_t *layer) {
+    *layer = layer_new_with_defaults();
     return theme_toml_parse(toml, layer, "theme.background.color",
                             "theme.background.alpha", "theme.font.size",
-                            "theme.font.file");
+                            "theme.font.file", "theme.font.color");
 }
 static theme_error_t theme_toml_parse_top(const toml_result_t *toml,
                                           theme_layer_t *layer) {
+    *layer = layer_new_with_top_defaults();
     return theme_toml_parse(toml, layer, "theme.top.background.color",
                             "theme.top.background.alpha", "theme.top.font.size",
-                            "theme.top.font.file");
+                            "theme.top.font.file", "theme.top.font.color");
 }
 static theme_error_t theme_toml_parse_body(const toml_result_t *toml,
                                            theme_layer_t *layer) {
+    *layer = layer_new_with_defaults();
     return theme_toml_parse(toml, layer, "theme.body.background.color",
                             "theme.body.background.alpha",
-                            "theme.body.font.size", "theme.body.font.file");
+                            "theme.body.font.size", "theme.body.font.file",
+                            "theme.body.font.color");
 }
 
 static theme_error_t theme_toml_parse_bottom(const toml_result_t *toml,
                                              theme_layer_t *layer) {
-
+    *layer = layer_new_with_defaults();
     return theme_toml_parse(toml, layer, "theme.bottom.background.color",
                             "theme.bottom.background.alpha",
-                            "theme.bottom.font.size", "theme.bottom.font.file");
+                            "theme.bottom.font.size", "theme.bottom.font.file",
+                            "theme.bottom.font.color");
 }
 
 // Merge src into dest. Fields that are "set" in src override dest.
@@ -256,6 +285,10 @@ static void theme_layer_merge(theme_layer_t *dest, const theme_layer_t *src) {
         free(dest->font.file);
         dest->font.file = strdup(src->font.file);
     }
+
+    if (src->font.color.r || src->font.color.g || src->font.color.b) {
+        dest->font.color = src->font.color;
+    }
 }
 const char *theme_error_str(theme_error_t err) {
     switch (err) {
@@ -268,7 +301,7 @@ const char *theme_error_str(theme_error_t err) {
     case THEME_PARSING_ERROR:
         return "failed to parse config TOML";
     case THEME_CONFIG_NOT_FOUND:
-        "return file path could not be determined (HOME not set?)";
+        return "return file path could not be determined (HOME not set?)";
     }
     return "unknown error";
 }

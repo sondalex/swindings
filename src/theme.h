@@ -20,6 +20,7 @@ typedef struct {
 typedef struct {
     float size; // > 0.0 = specified, else inherit
     char *file; // NULL = no custom file (use family or system)
+    theme_color_t color;
 } theme_font_t;
 
 typedef struct {
