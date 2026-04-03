@@ -2,6 +2,8 @@
 
 **View sway keybindings**
 
+![demo](public/site/demo.mp4)
+
 ## Installation
 
 ### Prerequisites
