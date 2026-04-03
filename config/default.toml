@@ -7,7 +7,7 @@ background.alpha = 0.95           # Optional: 0.0 = fully transparent, 1.0 = opa
 # Default font (applied to all sections unless overridden)
 # If neither the global and section font file are specified, the default raylib font is applied
 [theme.font]
-size = 14                         # Font size in points
+size = 16                         # Font size in points
 # file = ""                       # Optional: path to custom .ttf/.otf file
 
 # Section-specific overrides
@@ -16,7 +16,7 @@ background.color = "#11111B"
 background.alpha = 0.85
 
 [theme.top.font]
-size = 12.0
+size = 16.0
 # file = "/path/to/custom-bold.ttf"   # optional override
 
 [theme.body]

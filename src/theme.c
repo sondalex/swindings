@@ -138,7 +138,7 @@ static theme_color_t color_new_with_defaults(void) {
 
 static void font_init_with_defaults(theme_font_t *font) {
     font->file = NULL;
-    font->size = 14;
+    font->size = 16;
     font->color = (theme_color_t){
         .r = 130, .g = 130, .b = 130, .a = 255, .has_alpha = true};
 }
@@ -202,12 +202,23 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
             color.a = (uint8_t)(layer->background.alpha * 255.0f + 0.5f);
             color.has_alpha = true;
         }
+    } else if (bg_alpha.type == TOML_INT64) {
+        layer->background.alpha = (float)bg_alpha.u.int64;
+        layer->background.has_alpha = true;
+
+        if (!color.has_alpha) {
+            color.a = (uint8_t)(layer->background.alpha * 255.0f + 0.5f);
+            color.has_alpha = true;
+        }
     } else if (bg_alpha.type != TOML_UNKNOWN) {
         return THEME_PARSING_ERROR;
     }
 
     if (font_size.type == TOML_FP64) {
         font.size = (float)font_size.u.fp64;
+        font.has_size = true;
+    } else if (font_size.type == TOML_INT64) {
+        font.size = (float)font_size.u.int64;
         font.has_size = true;
     } else if (font_size.type != TOML_UNKNOWN) {
         return THEME_PARSING_ERROR;

@@ -1,0 +1,40 @@
+# Dracula — dark theme with vibrant purple and cyan accents
+# Palette: https://draculatheme.com/spec
+#
+# Background: #282A36   Current Line: #6272A4 Selection: #44475A
+# Foreground:  #F8F8F2   Comment:      #6272A4
+# Cyan:        #8BE9FD   Purple:       #BD93F9   Pink: #FF79C6
+
+[theme]
+background.color = "#282A36"
+background.alpha = 0.95
+
+[theme.font]
+size = 16
+color = "#F8F8F2"
+# file = ""
+
+[theme.top]
+background.color = "#21222C"
+background.alpha = 0.88
+
+[theme.top.font]
+size = 18.0
+color = "#BD93F9"
+# file = ""
+
+[theme.body]
+background.color = "#282A36"
+background.alpha = 0.98
+
+[theme.body.font]
+color = "#F8F8F2"
+# file = ""
+
+[theme.bottom]
+background.color = "#44475A"
+background.alpha = 0.92
+
+[theme.bottom.font]
+color = "#6272A4"
+# file = ""

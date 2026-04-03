@@ -1,0 +1,40 @@
+# Tokyo Night — dark theme inspired by Tokyo city lights
+# Palette: https://github.com/enkia/tokyo-night-vscode-theme
+#
+# bg:      #1A1B26   bg_dark: #16161E   bg_highlight: #292E42
+# fg:      #C0CAF5   fg_dark: #A9B1D6   comment:      #565F89
+# Blue:    #7AA2F7   Purple:  #BB9AF7   Cyan:         #7DCFFF
+
+[theme]
+background.color = "#1A1B26"
+background.alpha = 0.95
+
+
+font.size = 16
+font.color = "#C0CAF5"
+# file = ""
+
+[theme.top]
+background.color = "#16161E"
+background.alpha = 0.88
+
+[theme.top.font]
+size = 18.0
+color = "#7AA2F7"
+# file = ""
+
+[theme.body]
+background.color = "#1A1B26"
+background.alpha = 0.98
+
+[theme.body.font]
+color = "#C0CAF5"
+# file = ""
+
+[theme.bottom]
+background.color = "#292E42"
+background.alpha = 0.92
+
+[theme.bottom.font]
+color = "#565F89"
+# file = ""

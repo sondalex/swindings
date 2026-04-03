@@ -1,0 +1,40 @@
+# Gruvbox Dark — retro groove color scheme with warm tones
+# Palette: https://github.com/morhetz/gruvbox
+#
+# bg0:     #282828   bg1:     #3C3836   bg2:     #504945
+# fg0:     #FBF1C7   fg1:     #EBDBB2   fg2:     #D5C4A1
+# Yellow:  #FABD2F   Orange:  #FE8019   Aqua:    #8EC07C
+
+[theme]
+background.color = "#282828"
+background.alpha = 0.95
+
+[theme.font]
+size = 16
+color = "#EBDBB2"
+# file = ""
+
+[theme.top]
+background.color = "#1D2021"
+background.alpha = 0.88
+
+[theme.top.font]
+size = 18.0
+color = "#FABD2F"
+# file = ""
+
+[theme.body]
+background.color = "#282828"
+background.alpha = 0.98
+
+[theme.body.font]
+color = "#EBDBB2"
+# file = ""
+
+[theme.bottom]
+background.color = "#3C3836"
+background.alpha = 0.92
+
+[theme.bottom.font]
+color = "#D5C4A1"
+# file = ""
