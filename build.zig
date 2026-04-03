@@ -17,6 +17,7 @@ pub fn build(b: *std.Build) !void {
 
     // External build: raylib submodule (using raylib's own build.zig)
     const raylib_dep = b.dependency("raylib", .{
+        .target = target,
         .optimize = optimize,
     });
     const raylib = raylib_dep.artifact("raylib");
