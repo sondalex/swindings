@@ -2,7 +2,7 @@
 
 **View sway keybindings**
 
-![demo](assets/demo.mp4)
+![demo](public/site/demo.mp4)
 
 ## Installation
 
