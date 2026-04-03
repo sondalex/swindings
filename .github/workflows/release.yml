@@ -24,7 +24,9 @@ jobs:
         with:
           version: 0.16.0-dev.2984+cb7d2b056
       - name: Install build dependencies
-        run: sudo apt install libasound2-dev libx11-dev libxrandr-dev libxi-dev libgl1-mesa-dev libglu1-mesa-dev libxcursor-dev libxinerama-dev libwayland-dev libxkbcommon-dev
+        run: sudo apt install libasound2-dev libgl1-mesa-dev libglu1-mesa-dev \
+            libwayland-dev libxkbcommon-dev libegl-dev wayland-protocols \
+            pkg-config
       - name: Cleanup cache folders
         continue-on-error: true
         run: |
