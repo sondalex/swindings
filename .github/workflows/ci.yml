@@ -1,4 +1,4 @@
-name: CI Build
+name: CI Checks
 
 on:
   pull_request:
@@ -10,6 +10,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: "Clangd install"
+        run: sudo apt install clang-format
+      - name: "Clangd format"
+        run: git ls-files -z '*.c' | xargs -0 clang-format --dry-run --Werror
       - name: "Download submodules"
         run: git submodule update --init --recursive
       - name: Install zig 
