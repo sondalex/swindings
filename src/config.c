@@ -1,11 +1,10 @@
 #include "config.h"
-#include "stringlist.h"
 #include "asprintf.h"
+#include "stringlist.h"
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 
 config_error_t config_read_file(const char *filepath, StringList *out) {
     if (filepath == NULL || out == NULL) {

@@ -18,8 +18,7 @@ int main(void) {
     theme_t theme;
     theme_error_t err = theme_load_from_config(&theme);
     if (err != THEME_SUCCESS) {
-        fprintf(stderr, "Failed to set THEME: %s",
-                theme_error_str(err));
+        fprintf(stderr, "Failed to set THEME: %s", theme_error_str(err));
         return ThemeError;
     };
 
