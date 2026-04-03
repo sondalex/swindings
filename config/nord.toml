@@ -1,0 +1,40 @@
+# Nord — Arctic, cool-blue dark theme
+# Palette: https://www.nordtheme.com
+#
+# Polar Night: #2E3440 #3B4252 #434C5E #4C566A
+# Snow Storm:  #D8DEE9 #E5E9F0 #ECEFF4
+# Frost:       #8FBCBB #88C0D0 #81A1C1 #5E81AC
+
+[theme]
+background.color = "#2E3440"
+background.alpha = 0.95
+
+[theme.font]
+size = 16
+color = "#D8DEE9"
+# file = ""
+
+[theme.top]
+background.color = "#242933"
+background.alpha = 0.88
+
+[theme.top.font]
+size = 18.0
+color = "#88C0D0"
+# file = ""
+
+[theme.body]
+background.color = "#2E3440"
+background.alpha = 0.98
+
+[theme.body.font]
+color = "#D8DEE9"
+# file = ""
+
+[theme.bottom]
+background.color = "#3B4252"
+background.alpha = 0.92
+
+[theme.bottom.font]
+color = "#81A1C1"
+# file = ""

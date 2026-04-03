@@ -2,13 +2,20 @@
 #define CONFIG_H
 
 #include <stddef.h>
+#include "stringlist.h"
 
 static const char PATTERN[] = "bindsym";
-typedef struct {
-    char **items;
-    size_t count;
-    size_t capacity;
-} StringList;
+
+typedef enum {
+    CONFIG_SUCCESS = 0,
+    CONFIG_ERR_FILE_NOT_FOUND,
+    CONFIG_ERR_PERMISSION_DENIED,
+    CONFIG_ERR_OUT_OF_MEMORY,
+    CONFIG_ERR_READ_ERROR,
+    CONFIG_ERR_INVALID_FORMAT,
+    CONFIG_ERR_INVALID_ARGUMENT,
+    CONFIG_ERR_ALLOC_FAILED,
+} config_error_t;
 
 typedef struct {
     char *main_key;   // "mod", "Return", "q", etc.
@@ -28,12 +35,12 @@ typedef struct {
 // "bindsym $mod+Shift+h move left"
 //          ^^^^^^^^^^^  ^^^^^^^^^
 //          keys         description
-int parse_key_maps(StringList *list, KeyMapList *out);
+config_error_t parse_key_maps(StringList *list, KeyMapList *out);
 
 void keymaplist_init(KeyMapList *list);
 
 // Appends a KeyMap to the list. Returns 0 on success, -1 on error.
-int keymaplist_append(KeyMapList *list, KeyMap km);
+config_error_t keymaplist_append(KeyMapList *list, KeyMap km);
 
 // Frees all memory owned by the list and resets it to empty.
 void keymaplist_free(KeyMapList *list);
@@ -41,16 +48,11 @@ void keymaplist_free(KeyMapList *list);
 // Frees all memory owned by the KeyMap.
 void keymap_free(KeyMap *km);
 
-int stringlist_append(StringList *list, const char *s);
 
-void stringlist_init(StringList *list);
-
-int read_file(const char *filepath, StringList *out);
-
-void stringlist_free(StringList *list);
+config_error_t config_read_file(const char *filepath, StringList *out);
 
 // Returns the path to the sway config file, or NULL on error.
 // Caller must free() the returned string.
-char *get_sway_config_filepath(void);
+char *config_get_sway_filepath(void);
 
 #endif

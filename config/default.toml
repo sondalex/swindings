@@ -1,0 +1,35 @@
+# Global theme defaults
+[theme]
+# Default background for any section that doesn't override it
+background.color = "#1E1E2E"      # Hex RGB or #RRGGBB
+background.alpha = 0.95           # Optional: 0.0 = fully transparent, 1.0 = opaque. Overrides 
+
+# Default font (applied to all sections unless overridden)
+# If neither the global and section font file are specified, the default raylib font is applied
+[theme.font]
+size = 16                         # Font size in points
+# file = ""                       # Optional: path to custom .ttf/.otf file
+
+# Section-specific overrides
+[theme.top]
+background.color = "#11111B"
+background.alpha = 0.85
+
+[theme.top.font]
+size = 16.0
+# file = "/path/to/custom-bold.ttf"   # optional override
+
+[theme.body]
+background.color = "#1E1E2E"
+background.alpha = 0.98
+
+[theme.body.font]
+# file = "/path/to/custom-bold.ttf"   # optional override
+
+[theme.bottom]
+background.color = "#1E1E2E"
+background.alpha = 0.92
+
+[theme.bottom.font]
+# file = "/path/to/custom-bold.ttf"   # optional override
+

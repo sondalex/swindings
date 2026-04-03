@@ -1,45 +1,18 @@
 #include "config.h"
+#include "asprintf.h"
+#include "stringlist.h"
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
-#include "asprintf.h"
 
-
-
-int stringlist_append(StringList *list, const char *s) {
-    if (list->count == list->capacity) {
-        size_t new_cap = list->capacity ? list->capacity * 2 : 8;
-        char **tmp = (char **)realloc(list->items, new_cap * sizeof(*tmp));
-        if (!tmp)
-            return -1;
-        list->items = tmp;
-        list->capacity = new_cap;
+config_error_t config_read_file(const char *filepath, StringList *out) {
+    if (filepath == NULL || out == NULL) {
+        return CONFIG_ERR_INVALID_ARGUMENT;
     }
-    list->items[list->count] = strdup(s);
-    if (!list->items[list->count])
-        return -1;
-    list->count++;
-    return 0;
-}
-
-void stringlist_init(StringList *list) {
-    list->items = NULL;
-    list->count = 0;
-    list->capacity = 0;
-}
-
-void stringlist_free(StringList *list) {
-    for (size_t i = 0; i < list->count; i++)
-        free(list->items[i]);
-    free(list->items);
-    stringlist_init(list); // reset to safe empty state
-}
-
-int read_file(const char *filepath, StringList *out) {
     FILE *fp = fopen(filepath, "r");
     if (!fp)
-        return -1;
+        return CONFIG_ERR_FILE_NOT_FOUND;
 
     char *line = NULL;
     size_t len = 0;
@@ -60,17 +33,17 @@ int read_file(const char *filepath, StringList *out) {
             if (stringlist_append(out, pos) != 0) {
                 free(line);
                 fclose(fp);
-                return -1;
+                return CONFIG_ERR_OUT_OF_MEMORY;
             }
         }
     }
 
     free(line);
     fclose(fp);
-    return 0;
+    return CONFIG_SUCCESS;
 }
 
-char *get_sway_config_filepath(void) {
+char *config_get_sway_filepath(void) {
     const char *home = getenv("HOME");
     if (!home)
         return NULL;
@@ -88,17 +61,17 @@ void keymaplist_init(KeyMapList *list) {
     list->capacity = 0;
 }
 
-int keymaplist_append(KeyMapList *list, KeyMap km) {
+config_error_t keymaplist_append(KeyMapList *list, KeyMap km) {
     if (list->count == list->capacity) {
         size_t new_cap = list->capacity ? list->capacity * 2 : 8;
         KeyMap *tmp = realloc(list->items, new_cap * sizeof(*tmp));
         if (!tmp)
-            return -1;
+            return CONFIG_ERR_ALLOC_FAILED;
         list->items = tmp;
         list->capacity = new_cap;
     }
     list->items[list->count++] = km;
-    return 0;
+    return CONFIG_SUCCESS;
 }
 
 void keymap_free(KeyMap *km) {
@@ -116,7 +89,7 @@ void keymaplist_free(KeyMapList *list) {
     keymaplist_init(list);
 }
 
-int parse_key_maps(StringList *lines, KeyMapList *out) {
+config_error_t parse_key_maps(StringList *lines, KeyMapList *out) {
     for (size_t i = 0; i < lines->count; i++) {
         char *key_combo = NULL;
         char *desc = NULL;
@@ -173,7 +146,7 @@ int parse_key_maps(StringList *lines, KeyMapList *out) {
 
         if (keymaplist_append(out, km) != 0) {
             keymap_free(&km);
-            return -1;
+            return CONFIG_ERR_ALLOC_FAILED;
         }
         continue;
 
@@ -184,7 +157,7 @@ int parse_key_maps(StringList *lines, KeyMapList *out) {
         free(tmp);
         free(key_combo);
         free(desc);
-        return -1;
+        return CONFIG_ERR_ALLOC_FAILED;
     }
-    return 0;
+    return CONFIG_SUCCESS;
 }
