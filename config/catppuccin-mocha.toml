@@ -1,0 +1,40 @@
+# Catppuccin Mocha — warm dark theme with pastel accents
+# Palette: https://github.com/catppuccin/catppuccin
+#
+# Base:    #1E1E2E   Mantle:  #181825   Crust:   #11111B
+# Text:    #CDD6F4   Subtext: #BAC2DE   Overlay: #6C7086
+# Lavender:#B4BEFE   Mauve:   #CBA6F7
+
+[theme]
+background.color = "#1E1E2E"
+background.alpha = 0.95
+
+[theme.font]
+size = 16
+color = "#CDD6F4"
+# file = ""
+
+[theme.top]
+background.color = "#11111B"
+background.alpha = 0.85
+
+[theme.top.font]
+size = 18.0
+color = "#B4BEFE"
+# file = ""
+
+[theme.body]
+background.color = "#1E1E2E"
+background.alpha = 0.98
+
+[theme.body.font]
+color = "#CDD6F4"
+# file = ""
+
+[theme.bottom]
+background.color = "#181825"
+background.alpha = 0.92
+
+[theme.bottom.font]
+color = "#BAC2DE"
+# file = ""

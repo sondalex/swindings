@@ -1,0 +1,40 @@
+# Catppuccin Latte — light theme with soft pastel accents
+# Palette: https://github.com/catppuccin/catppuccin
+#
+# Base:    #EFF1F5   Mantle:  #E6E9EF   Crust:   #DCE0E8
+# Text:    #4C4F69   Subtext: #5C5F77   Overlay: #7C7F93
+# Lavender:#7287FD   Mauve:   #8839EF
+
+[theme]
+background.color = "#EFF1F5"
+background.alpha = 0.95
+
+[theme.font]
+size = 16
+color = "#4C4F69"
+# file = ""
+
+[theme.top]
+background.color = "#DCE0E8"
+background.alpha = 0.88
+
+[theme.top.font]
+size = 18.0
+color = "#7287FD"
+# file = ""
+
+[theme.body]
+background.color = "#EFF1F5"
+background.alpha = 0.98
+
+[theme.body.font]
+color = "#4C4F69"
+# file = ""
+
+[theme.bottom]
+background.color = "#E6E9EF"
+background.alpha = 0.92
+
+[theme.bottom.font]
+color = "#5C5F77"
+# file = ""

@@ -1,0 +1,40 @@
+# Solarized Dark — precision color scheme with blue-green tones
+# Palette: https://ethanschoonover.com/solarized
+#
+# base03:  #002B36   base02:  #073642   base01:  #586E75
+# base0:   #839496   base1:   #93A1A1   base2:   #EEE8D5
+# Cyan:    #2AA198   Blue:    #268BD2   Yellow:  #B58900
+
+[theme]
+background.color = "#002B36"
+background.alpha = 0.95
+
+[theme.font]
+size = 16
+color = "#839496"
+# file = ""
+
+[theme.top]
+background.color = "#001E27"
+background.alpha = 0.88
+
+[theme.top.font]
+size = 18.0
+color = "#2AA198"
+# file = ""
+
+[theme.body]
+background.color = "#002B36"
+background.alpha = 0.98
+
+[theme.body.font]
+color = "#839496"
+# file = ""
+
+[theme.bottom]
+background.color = "#073642"
+background.alpha = 0.92
+
+[theme.bottom.font]
+color = "#586E75"
+# file = ""
