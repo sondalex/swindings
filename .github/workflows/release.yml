@@ -35,8 +35,7 @@ jobs:
           rm -rfv "$ZIG_LOCAL_CACHE_DIR" || true
           set +x
       - name: Build project
-        run: zig build --summary all -j1 --color off -freference-trace=0 -Doptimize=ReleaseSafe -Dtarget=x86_64-linux-gnu --verbose
-
+        run: zig build --summary all -j1 --color off -freference-trace=0 -Doptimize=ReleaseSafe -Dtarget=x86_64-linux-gnu.2.39 --verbose
       
       - name: Get version from tag
         id: get_version
