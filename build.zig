@@ -1,19 +1,33 @@
 const std = @import("std");
 const zcc = @import("zig_compile_commands");
-
-fn getGitVersion(b: *std.Build, io: std.Io) ![]const u8 { 
-    const result = std.process.run(
+fn getGitVersion(b: *std.Build, io: std.Io) ![]const u8 {
+    const tag_result = std.process.run(
         b.allocator,
         io,
         .{
-        .argv = &.{ "git", "describe", "--tags",  "--always" },
-    }) catch |err| {
-        std.debug.print("Warning: git describe failed ({s}), using fallback\n", .{@errorName(err)});
-        return error.GitFailed;
+            .argv = &.{ "git", "describe", "--tags", "--exact-match" },
+        },
+    ) catch |err| {
+        if (err != error.ProcessTerminatedWithNonZeroExitCode) {
+            std.debug.print("Warning: git describe --exact-match failed ({s})\n", .{@errorName(err)});
+        }
+        const hash_result = std.process.run(
+            b.allocator,
+            io,
+            .{
+                .argv = &.{ "git", "describe", "--tags", "--always" },
+            },
+        ) catch |hash_err| {
+            std.debug.print("Warning: git describe --always failed ({s}), using fallback\n", .{@errorName(hash_err)});
+            return error.GitFailed;
+        };
+
+        const trimmed_hash = std.mem.trim(u8, hash_result.stdout, " \n\r\t");
+        return b.dupe(trimmed_hash);
     };
 
-    const trimmed = std.mem.trim(u8, result.stdout, " \n\r\t");
-    return b.dupe(trimmed);
+    const trimmed_tag = std.mem.trim(u8, tag_result.stdout, " \n\r\t");
+    return b.dupe(trimmed_tag);
 }
 
 fn addSystemLibraryPaths(mod: *std.Build.Module, io: std.Io) void {
