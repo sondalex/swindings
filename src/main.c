@@ -1,6 +1,8 @@
 #include "config.h"
 #include "display.h"
 #include "theme.h"
+#include "cli.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 // TODO: Include error/status struct for theme.c
@@ -12,15 +14,29 @@ typedef enum {
     ThemeError,
 } Error;
 
-int main(void) {
+int main(int argc, char *argv[]) {
+    cli_args args;
+    if (!parse_cli(argc, argv, &args)) {
+        return (args.help || args.version) ? Success : 1;
+    }
+
     StringList list;
     stringlist_init(&list);
     theme_t theme;
-    theme_error_t err = theme_load_from_config(&theme);
+    theme_error_t err = THEME_SUCCESS;
+    if (args.config) {
+        theme_result_t res = theme_load(args.config);
+        err = res.error;
+        if (err == THEME_SUCCESS) {
+            theme = res.theme;
+        }
+    } else {
+        err = theme_load_from_config(&theme);
+    }
     if (err != THEME_SUCCESS) {
-        fprintf(stderr, "Failed to set THEME: %s", theme_error_str(err));
+        fprintf(stderr, "Failed to set THEME: %s\n", theme_error_str(err));
         return ThemeError;
-    };
+    }
 
     char *filepath = config_get_sway_filepath();
     if (!filepath) {
