@@ -6,22 +6,22 @@
 
 static struct cag_option options[] = {
     {.identifier = 'h',
-        .access_letters = "h",
-        .access_name = "help",
-        .value_name = NULL,
-        .description = "Shows this help message"},
+     .access_letters = "h",
+     .access_name = "help",
+     .value_name = NULL,
+     .description = "Shows this help message"},
 
     {.identifier = 'v',
-        .access_letters = "v",
-        .access_name = "version",
-        .value_name = NULL,
-        .description = "Shows the version"},
+     .access_letters = "v",
+     .access_name = "version",
+     .value_name = NULL,
+     .description = "Shows the version"},
 
     {.identifier = 'c',
-        .access_letters = "c",
-        .access_name = "config",
-        .value_name = "FILE",
-        .description = "Path to a theme configuration file (TOML)"},
+     .access_letters = "c",
+     .access_name = "config",
+     .value_name = "FILE",
+     .description = "Path to a theme configuration file (TOML)"},
 };
 
 static void init_args(cli_args *args) {

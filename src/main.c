@@ -1,7 +1,7 @@
+#include "cli.h"
 #include "config.h"
 #include "display.h"
 #include "theme.h"
-#include "cli.h"
 
 #include <stdio.h>
 #include <stdlib.h>
