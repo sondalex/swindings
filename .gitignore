@@ -3,6 +3,7 @@ TODO.md
 build/
 subprojects/*/
 !subprojects/raygui/
+!subprojects/cargs/
 !subprojects/asprintf/
 !subprojects/tomlc17/
 !subprojects/packagefiles/

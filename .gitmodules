@@ -7,3 +7,6 @@
 [submodule "subprojects/tomlc17"]
 	path = subprojects/tomlc17
 	url = https://github.com/cktan/tomlc17.git
+[submodule "subprojects/cargs"]
+	path = subprojects/cargs
+	url = https://github.com/likle/cargs.git
