@@ -13,3 +13,6 @@
 [submodule "subprojects/unity"]
 	path = subprojects/unity
 	url = https://github.com/ThrowTheSwitch/Unity
+[submodule "subprojects/fzy"]
+	path = subprojects/fzy
+	url = https://github.com/jhawthorn/fzy.git
