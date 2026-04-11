@@ -145,11 +145,35 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.linkSystemLibrary("m", .{});
     b.installArtifact(exe);
 
-    // --- Step 8: Compile Commands ---
+    // Unit tests
+
+    const unit_test = b.addExecutable(.{
+        .name = "unit_tests",
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+    });
+
+    addCIncludePaths(unit_test.root_module, &[_][]const u8{ "subprojects/unity/src/", "src" });
+
+    addCSourceFiles(unit_test.root_module, &[_][]const u8{
+        "tests/stringlist_test.c",
+        "subprojects/unity/src/unity.c",
+    }, &c_flags);
+    b.installArtifact(unit_test);
+
+    const run_unit_tests = b.addRunArtifact(unit_test);
+    const test_step = b.step("test", "Run unit tests with Unity");
+    test_step.dependOn(&run_unit_tests.step);
+
+    // Generate compile commands
     var targets: std.ArrayList(*std.Build.Step.Compile) = .empty;
 
     defer targets.deinit(b.allocator);
     try targets.append(b.allocator, exe);
+    try targets.append(b.allocator, unit_test);
     const cdb_step = zcc.createStep(b, "cdb", try targets.toOwnedSlice(b.allocator));
     cdb_step.dependOn(&exe.step);
 }

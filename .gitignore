@@ -7,6 +7,7 @@ subprojects/*/
 !subprojects/asprintf/
 !subprojects/tomlc17/
 !subprojects/packagefiles/
+!subprojects/unity/
 logs
 *.log
 npm-debug.log*
