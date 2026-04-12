@@ -40,3 +40,17 @@ bindsym $mod+k+m swindings
 git clone https://github.com/sondalex/swindings.git
 git submodule update --init --recursive
 ```
+
+## Development
+
+### Testing
+
+```bash
+zig build test
+```
+
+### Generating compile_commands.json
+
+```bash
+zig build cdb
+```

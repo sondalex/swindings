@@ -73,27 +73,33 @@ fn addSystemLibraryPaths(mod: *std.Build.Module, io: std.Io) void {
     }
 }
 
-fn copyConfigHeader(b: *std.Build) !std.ArrayList([]const u8) {
-    const config_include = b.addWriteFiles();
-    _ = config_include.addCopyFile(
+fn copyConfigHeader(b: *std.Build) !std.ArrayList(std.Build.LazyPath) {
+    const wf = b.addWriteFiles();
+
+    _ = wf.addCopyFile(
         b.path("subprojects/fzy/src/config.def.h"),
         "../config.h",
     );
-    var include_paths: std.ArrayList([]const u8) = .empty;
-    try include_paths.appendSlice(b.allocator, &[_][]const u8{
-        "subprojects/raygui/src",
-        "subprojects/asprintf",
-        "subprojects/tomlc17/src",
-        "subprojects/cargs/include",
-        "subprojects/fzy/src",
+
+    const config_dir: std.Build.LazyPath = wf.getDirectory();
+
+    var include_paths: std.ArrayList(std.Build.LazyPath) = .empty;
+    try include_paths.appendSlice(b.allocator, &.{
+        b.path("subprojects/raygui/src"),
+        b.path("subprojects/asprintf"),
+        b.path("subprojects/tomlc17/src"),
+        b.path("subprojects/cargs/include"),
+        b.path("subprojects/fzy/src"),
     });
-    try include_paths.append(b.allocator, config_include.getDirectory().getDisplayName());
+
+    try include_paths.append(b.allocator, config_dir);
+
     return include_paths;
 }
 
-fn addCIncludePaths(mod: *std.Build.Module, include_paths: []const []const u8) void {
-    for (include_paths) |path| {
-        mod.addIncludePath(.{ .cwd_relative = path });
+fn addCIncludePaths(mod: *std.Build.Module, include_paths: std.ArrayList(std.Build.LazyPath)) void {
+    for (include_paths.items) |path| {
+        mod.addIncludePath(path);
     }
 }
 
@@ -135,7 +141,7 @@ pub fn build(b: *std.Build) !void {
     const include_paths = try copyConfigHeader(b);
     exe.root_module.addCMacro("GIT_VERSION", b.fmt("\"{s}\"", .{version}));
     addSystemLibraryPaths(exe.root_module, io);
-    addCIncludePaths(exe.root_module, include_paths.items);
+    addCIncludePaths(exe.root_module, include_paths);
 
     // --- Step 6: Source Files ---
     addCSourceFiles(exe.root_module, &src_files, &c_flags);
@@ -145,11 +151,41 @@ pub fn build(b: *std.Build) !void {
     exe.root_module.linkSystemLibrary("m", .{});
     b.installArtifact(exe);
 
-    // --- Step 8: Compile Commands ---
+    // Unit tests
+
+    const unit_test = b.addExecutable(.{
+        .name = "unit_tests",
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+    });
+
+    var test_include_paths: std.ArrayList(std.Build.LazyPath) = .empty;
+    try test_include_paths.appendSlice(b.allocator, &.{
+        b.path("subprojects/unity/src/"),
+        b.path("src"),
+    });
+
+    addCIncludePaths(unit_test.root_module, test_include_paths);
+
+    addCSourceFiles(unit_test.root_module, &[_][]const u8{
+        "tests/stringlist_test.c",
+        "subprojects/unity/src/unity.c",
+    }, &c_flags);
+    b.installArtifact(unit_test);
+
+    const run_unit_tests = b.addRunArtifact(unit_test);
+    const test_step = b.step("test", "Run unit tests with Unity");
+    test_step.dependOn(&run_unit_tests.step);
+
+    // Generate compile commands
     var targets: std.ArrayList(*std.Build.Step.Compile) = .empty;
 
     defer targets.deinit(b.allocator);
     try targets.append(b.allocator, exe);
+    try targets.append(b.allocator, unit_test);
     const cdb_step = zcc.createStep(b, "cdb", try targets.toOwnedSlice(b.allocator));
     cdb_step.dependOn(&exe.step);
 }
