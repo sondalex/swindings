@@ -140,7 +140,7 @@ pub fn build(b: *std.Build) !void {
         }),
     });
 
-    const install_path = b.getInstallPath(.prefix, "share/fonts");
+    const install_path = b.getInstallPath(.prefix, "share/swindings/fonts");
 
     _ = dz.addDownloadStep(
         b,

@@ -6,7 +6,7 @@
 
 #define THEME_DEFAULT_BG_ALPHA 180
 
-#define DEFAULT_FONT_SUFFIX "share/fonts/JetBrainsMonoNerdFont-Regular.ttf"
+#define DEFAULT_FONT_SUFFIX "share/swindings/fonts/JetBrainsMonoNerdFont-Regular.ttf"
 #define F_DEFAULT_FONT_SUFFIX "%s/" DEFAULT_FONT_SUFFIX 
 
 typedef struct {
