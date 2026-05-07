@@ -6,6 +6,8 @@ REPO="swindings"
 OWNER="sondalex"
 DEFAULT_BIN_DIR="$HOME/.local/bin"
 BIN_DIR="$DEFAULT_BIN_DIR"
+DEFAULT_SHARE_DIR="$HOME/.local/share"
+SHARE_DIR="$DEFAULT_SHARE_DIR"
 ARCH="linux-x86_64"
 APP="swindings"
 
@@ -15,10 +17,11 @@ red() { echo -e "\033[0;31m$1\033[0m"; }
 
 usage() {
   cat <<EOF
-Usage: $0 [--version <vX.Y.Z>] [--bin-dir <dir>]
+Usage: $0 [--version <vX.Y.Z>] [--bin-dir <dir>] [--share-dir <dir>]
 Install $APP from GitHub releases.
-  --version <tag>: Specify release version (default: latest)
-  --bin-dir <dir>: Install directory (default: $DEFAULT_BIN_DIR)
+  --version <tag>:   Specify release version (default: latest)
+  --bin-dir <dir>:   Install binary directory (default: $DEFAULT_BIN_DIR)
+  --share-dir <dir>: Install share directory (default: $DEFAULT_SHARE_DIR)
 EOF
   exit 1
 }
@@ -31,6 +34,8 @@ while [[ $# -gt 0 ]]; do
       VERSION="$2"; shift; shift;;
     --bin-dir)
       BIN_DIR="$2"; shift; shift;;
+    --share-dir)
+      SHARE_DIR="$2"; shift; shift;;
     -h|--help)
       usage;;
     *)
@@ -74,5 +79,10 @@ mkdir -p "$BIN_DIR"
 cp bin/swindings "$BIN_DIR/"
 chmod +x "$BIN_DIR/swindings"
 
+[ ! -d share ] && red "Build archive corrupt (missing share/)!" && exit 3
+mkdir -p "$SHARE_DIR"
+cp -r share/. "$SHARE_DIR/"
+
 green "$APP was installed to $BIN_DIR/swindings."
+green "Shared data installed to $SHARE_DIR."
 

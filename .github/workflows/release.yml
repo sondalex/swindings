@@ -57,7 +57,7 @@ jobs:
           mkdir -p release/bin
           mkdir -p release/share
           cp zig-out/bin/swindings release/bin/
-          cp -r zig-out/share/ release/share/
+          cp -r zig-out/share release/
 
       - name: Tarball the build
         run: |
