@@ -55,7 +55,9 @@ jobs:
       - name: Make release archive structure
         run: |
           mkdir -p release/bin
+          mkdir -p release/share
           cp zig-out/bin/swindings release/bin/
+          cp zig-out/share/ release/share/
 
       - name: Tarball the build
         run: |
