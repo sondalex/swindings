@@ -17,6 +17,11 @@ typedef enum {
 
 } DisplayError;
 
+typedef struct {
+    const char *info;
+    const char *search;
+} labels_t;
+
 void display(const KeyMapList *kml, const theme_t *theme);
 
 #endif

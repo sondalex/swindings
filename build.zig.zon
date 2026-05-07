@@ -10,6 +10,10 @@
             .url = "git+https://github.com/sondalex/zig-compile-commands.git#c13f0048f8cf04cca84f1691adc001123ce98d43",
             .hash = "zig_compile_commands-0.0.1-OZg5-bvHAADAOeqOwy6BcPnWA5q73i4XCjOT20AHBkWd",
         },
+        .download_zip = .{
+            .url = "https://github.com/sondalex/zig-download-zip/archive/refs/heads/main.tar.gz",
+            .hash = "zig_download_zip-0.0.0-gPJu3w8jAAAuihuSJgmffFT7nr_VDgxA9wkb1HAL7xAk",
+        },
     },
     .paths = .{"."},
     .fingerprint = 0x2e0746e398ec10b0,

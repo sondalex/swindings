@@ -1,5 +1,6 @@
 const std = @import("std");
 const zcc = @import("zig_compile_commands");
+const dz = @import("download_zip");
 
 const c_flags = [_][]const u8{
     "-std=c99",
@@ -11,15 +12,17 @@ const c_flags = [_][]const u8{
 
 const src_files = [_][]const u8{
     "src/main.c",
+    "src/search.c",
     "src/config.c",
     "src/keyicon.c",
     "src/display.c",
-    "src/stringlist.c",
+    "src/structures.c",
     "src/theme.c",
     "src/cli.c",
     "subprojects/tomlc17/src/tomlc17.c",
     "subprojects/cargs/src/cargs.c",
     "subprojects/fzy/src/match.c",
+    "subprojects/asprintf/asprintf.c",
 };
 
 fn getGitVersion(b: *std.Build, io: std.Io) ![]const u8 {
@@ -137,6 +140,16 @@ pub fn build(b: *std.Build) !void {
         }),
     });
 
+    const install_path = b.getInstallPath(.prefix, "share/fonts");
+
+    _ = dz.addDownloadStep(
+        b,
+        "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/JetBrainsMono.zip",
+        install_path,
+        "dz",
+        "Download JetBrainsMono Font",
+    );
+
     // --- Step 5: Config & Include Paths ---
     const include_paths = try copyConfigHeader(b);
     exe.root_module.addCMacro("GIT_VERSION", b.fmt("\"{s}\"", .{version}));
@@ -164,15 +177,23 @@ pub fn build(b: *std.Build) !void {
 
     var test_include_paths: std.ArrayList(std.Build.LazyPath) = .empty;
     try test_include_paths.appendSlice(b.allocator, &.{
-        b.path("subprojects/unity/src/"),
+        b.path("subprojects/unity/src"),
         b.path("src"),
+        b.path("subprojects/tomlc17/src"),
+        b.path("subprojects/asprintf"),
     });
 
     addCIncludePaths(unit_test.root_module, test_include_paths);
 
     addCSourceFiles(unit_test.root_module, &[_][]const u8{
-        "tests/stringlist_test.c",
+        "tests/all_test.c",
+        "tests/structures_test.c",
+        "tests/theme_test.c",
         "subprojects/unity/src/unity.c",
+        "src/structures.c",
+        "src/theme.c",
+        "subprojects/tomlc17/src/tomlc17.c",
+        "subprojects/asprintf/asprintf.c",
     }, &c_flags);
     b.installArtifact(unit_test);
 
