@@ -31,29 +31,45 @@ swindings
 Those themes are available:
 
 **Default**
+
 ![Default](assets/default.png)
+
 ---
 
 **Tokyo-Night**
+
 ![Tokyo-Night](assets/tokyo-night.png)
+
 ---
 **Solarized Dark**
+
 ![Solarized Dark](assets/solarized-dark.png)
+
 ---
 **Catppuccin Mocha**
+
 ![Catppuccin Mocha](assets/catppuccin-mocha.png)
+
 ---
-**[Catppuccin Latte**
+**Catppuccin Latte**
+
 ![Catppuccin Latte](assets/catppuccin-latte.png)
+
 ---
 **Dracula**
+
 ![Dracula](assets/dracula.png)
+
 ---
 **Gruvbox Dark**
+
 ![Gruvbox Dark](assets/gruvbox-dark.png)
+
 ---
 **Nord**
+
 ![Nord](assets/nord.png)
+
 ---
 
 
