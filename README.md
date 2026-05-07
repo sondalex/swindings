@@ -2,7 +2,7 @@
 
 **View sway keybindings**
 
-[demo](https://github.com/user-attachments/assets/71a746ae-131a-4b7b-85b7-2330b63ebcd1)
+[demo](https://github.com/user-attachments/assets/5d8c331c-d5ad-4ddc-b6cc-b9aa46668755)
 
 ## Installation
 
