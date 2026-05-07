@@ -8,12 +8,12 @@ static const KeySymbol key_symbols[] = {
     {"$down", "↓", 0x2193},     {"Left", "←", 0x2190},   {"$left", "←", 0x2190},
     {"Right", "→", 0x2192},     {"$right", "→", 0x2192}, {"space", "␣", 0x2423},
     {"BackSpace", "⌫", 0x232B}, {"Delete", "⌦", 0x2326}, {"$mod", "⌘", 0x2318},
-
+    {"Magnify", "", 0xE644} // ← Right-pointing magnifying glass
 };
 
 const int key_codepoints[] = {0x21E7, 0x2303, 0x2325, 0x23CE, 0x238B,
                               0x21E5, 0x2191, 0x2193, 0x2190, 0x2192,
-                              0x2423, 0x232B, 0x2326, 0x2318};
+                              0x2423, 0x232B, 0x2326, 0x2318, 0xE644};
 const int key_codepoints_count =
     sizeof(key_codepoints) / sizeof(key_codepoints[0]);
 

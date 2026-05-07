@@ -1,12 +1,26 @@
 #include "config.h"
 #include "asprintf.h"
-#include "stringlist.h"
+#include "structures.h"
+#include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-config_error_t config_read_file(const char *filepath, StringList *out) {
+static void capitalize_into(const char *src, char *buf);
+
+static void capitalize_into(const char *src, char *buf) {
+    if (!src || !src[0]) {
+        buf[0] = '\0';
+        return;
+    }
+    size_t len = strlen(src);
+    memcpy(buf, src, len);
+    buf[len] = '\0';
+    buf[0] = toupper((unsigned char)buf[0]);
+}
+
+config_error_t config_read_file(const char *filepath, stringlist_t *out) {
     if (filepath == NULL || out == NULL) {
         return CONFIG_ERR_INVALID_ARGUMENT;
     }
@@ -89,7 +103,7 @@ void keymaplist_free(KeyMapList *list) {
     keymaplist_init(list);
 }
 
-config_error_t parse_key_maps(StringList *lines, KeyMapList *out) {
+config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
     for (size_t i = 0; i < lines->count; i++) {
         char *key_combo = NULL;
         char *desc = NULL;
@@ -110,7 +124,12 @@ config_error_t parse_key_maps(StringList *lines, KeyMapList *out) {
         if (!key_combo)
             goto fail;
 
-        desc = strdup(space + 1);
+        size_t len = strlen(space + 1); // Length after the space
+        desc = malloc(len + 1);
+        if (!desc) {
+            return CONFIG_ERR_ALLOC_FAILED;
+        }
+        capitalize_into(space + 1, desc);
         if (!desc)
             goto fail;
 

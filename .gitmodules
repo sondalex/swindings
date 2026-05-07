@@ -10,9 +10,10 @@
 [submodule "subprojects/cargs"]
 	path = subprojects/cargs
 	url = https://github.com/likle/cargs.git
+[submodule "subprojects/fzy"]
+	path = subprojects/fzy
+	url = https://github.com/sondalex/fzy.git
+	branch = add_number_matched_positions
 [submodule "subprojects/unity"]
 	path = subprojects/unity
 	url = https://github.com/ThrowTheSwitch/Unity
-[submodule "subprojects/fzy"]
-	path = subprojects/fzy
-	url = https://github.com/jhawthorn/fzy.git

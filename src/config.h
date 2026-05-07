@@ -2,7 +2,7 @@
 #define CONFIG_H
 
 #include <stddef.h>
-#include "stringlist.h"
+#include "structures.h"
 
 static const char PATTERN[] = "bindsym";
 
@@ -35,7 +35,7 @@ typedef struct {
 // "bindsym $mod+Shift+h move left"
 //          ^^^^^^^^^^^  ^^^^^^^^^
 //          keys         description
-config_error_t parse_key_maps(StringList *list, KeyMapList *out);
+config_error_t parse_key_maps(stringlist_t *list, KeyMapList *out);
 
 void keymaplist_init(KeyMapList *list);
 
@@ -49,7 +49,7 @@ void keymaplist_free(KeyMapList *list);
 void keymap_free(KeyMap *km);
 
 
-config_error_t config_read_file(const char *filepath, StringList *out);
+config_error_t config_read_file(const char *filepath, stringlist_t *out);
 
 // Returns the path to the sway config file, or NULL on error.
 // Caller must free() the returned string.

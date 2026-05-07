@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
         return (args.help || args.version) ? Success : 1;
     }
 
-    StringList list;
+    stringlist_t list;
     stringlist_init(&list);
     theme_t theme;
     theme_error_t err = THEME_SUCCESS;

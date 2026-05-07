@@ -15,26 +15,33 @@ color = "#839496"
 # file = ""
 
 [theme.top]
-background.color = "#001E27"
-background.alpha = 0.88
+# background.color = "#001E27"
+# background.alpha = 0.88
 
 [theme.top.font]
-size = 18.0
-color = "#2AA198"
+size = 17.0
+# color = "#2AA198"
 # file = ""
 
 [theme.body]
-background.color = "#002B36"
-background.alpha = 0.98
+# background.color = "#002B36"
+# background.alpha = 0.98
 
 [theme.body.font]
-color = "#839496"
+# color = "#839496"
 # file = ""
 
 [theme.bottom]
-background.color = "#073642"
-background.alpha = 0.92
+# background.color = "#073642"
+# background.alpha = 0.92
 
 [theme.bottom.font]
 color = "#586E75"
+size = 20.0
 # file = ""
+
+[theme.highlight]
+background.color = "#2AA198"
+background.alpha = 0.90
+font.color = "#002B36"
+
