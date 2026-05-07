@@ -30,14 +30,14 @@ swindings
 
 Those themes are available:
 
-![Default](default.png)
-![Tokyo-Night](tokyo-night.png)
-![Solarized Dark](solarized-dark.png)
-![Catppuccin Mocha.png](catppuccin-mocha.png)
-![Catppuccin Latte](catppuccin-latte.png)
-![Dracula](dracula.png)
-![Gruvbox Dark](gruvbox-dark.png)
-![Nord](nord.png)
+![Default](assets/default.png)
+![Tokyo-Night](assets/tokyo-night.png)
+![Solarized Dark](assets/solarized-dark.png)
+![Catppuccin Mocha.png](assets/catppuccin-mocha.png)
+![Catppuccin Latte](assets/catppuccin-latte.png)
+![Dracula](assets/dracula.png)
+![Gruvbox Dark](assets/gruvbox-dark.png)
+![Nord](assets/nord.png)
 
 
 If you want to switch for Tokyo-Night:
