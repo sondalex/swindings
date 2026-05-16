@@ -138,6 +138,8 @@ static theme_color_t color_new_with_defaults(void) {
 static void font_init_with_defaults(theme_font_t *font) {
     font->file = NULL;
     font->size = 16;
+    font->has_size = false;
+    font->has_color = false;
     font->color = (theme_color_t){
         .r = 130, .g = 130, .b = 130, .a = 255, .has_alpha = true};
 }
@@ -256,6 +258,7 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
 
     // Parse font file
     if (font_file.type == TOML_STRING) {
+        free(font.file);
         if (strlen(font_file.u.str.ptr) > 0) {
             font.file = strdup(font_file.u.str.ptr);
             if (!font.file)

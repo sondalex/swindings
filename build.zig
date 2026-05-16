@@ -8,6 +8,20 @@ const c_flags = [_][]const u8{
     "-Wextra",
     "-pedantic",
     "-D_POSIX_C_SOURCE=200809L",
+    "-Wshadow",
+    "-Wvla",
+    "-Wfloat-equal",
+    "-Wdouble-promotion",
+    "-Wformat=2",
+    "-Wformat-truncation",
+    "-Wundef",
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-Wnull-dereference",
+    "-Wuninitialized",
+    "-Winit-self",
+    "-Wstrict-prototypes",
+    "-Wold-style-definition",
 };
 
 const src_files = [_][]const u8{
@@ -19,11 +33,28 @@ const src_files = [_][]const u8{
     "src/structures.c",
     "src/theme.c",
     "src/cli.c",
+};
+
+const deps_files = [_][]const u8{
     "subprojects/tomlc17/src/tomlc17.c",
     "subprojects/cargs/src/cargs.c",
     "subprojects/fzy/src/match.c",
     "subprojects/asprintf/asprintf.c",
 };
+
+const debug_sanitizer_flags = [_][]const u8{
+    "-fno-omit-frame-pointer",
+    "-fsanitize=undefined",
+    "-g3",
+    // "-fsanitize=leak", # NOTE: valgrind is used instead
+};
+
+fn combineFlags(allocator: std.mem.Allocator, a: []const []const u8, b: []const []const u8) ![]const []const u8 {
+    var list: std.ArrayList([]const u8) = .empty;
+    try list.appendSlice(allocator, a);
+    try list.appendSlice(allocator, b);
+    return list.toOwnedSlice(allocator);
+}
 
 fn getGitVersion(b: *std.Build, io: std.Io) ![]const u8 {
     const tag_result = std.process.run(
@@ -76,7 +107,7 @@ fn addSystemLibraryPaths(mod: *std.Build.Module, io: std.Io) void {
     }
 }
 
-fn copyConfigHeader(b: *std.Build) !std.ArrayList(std.Build.LazyPath) {
+fn getIncludePaths(b: *std.Build) !std.ArrayList(std.Build.LazyPath) {
     const wf = b.addWriteFiles();
 
     _ = wf.addCopyFile(
@@ -120,6 +151,7 @@ pub fn build(b: *std.Build) !void {
     // --- Step 2: Target & Optimization ---
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
+    const valgrind = b.option(bool, "valgrind", "Build with WITH_VALGRIND defined") orelse false;
 
     // --- Step 3: Dependencies ---
     const raylib_dep = b.dependency("raylib", .{
@@ -137,6 +169,7 @@ pub fn build(b: *std.Build) !void {
             .target = target,
             .optimize = optimize,
             .link_libc = true,
+            .sanitize_c = if (optimize == .Debug) .full else .off,
         }),
     });
 
@@ -151,13 +184,18 @@ pub fn build(b: *std.Build) !void {
     );
 
     // --- Step 5: Config & Include Paths ---
-    const include_paths = try copyConfigHeader(b);
+    const include_paths = try getIncludePaths(b);
     exe.root_module.addCMacro("GIT_VERSION", b.fmt("\"{s}\"", .{version}));
+    if (valgrind) exe.root_module.addCMacro("WITH_VALGRIND", "1");
     addSystemLibraryPaths(exe.root_module, io);
     addCIncludePaths(exe.root_module, include_paths);
 
+    const exe_flags = try combineFlags(b.allocator, &c_flags, if (optimize == .Debug) &debug_sanitizer_flags else &.{});
+    defer b.allocator.free(exe_flags);
+
     // --- Step 6: Source Files ---
-    addCSourceFiles(exe.root_module, &src_files, &c_flags);
+    addCSourceFiles(exe.root_module, &src_files, exe_flags);
+    addCSourceFiles(exe.root_module, &deps_files, &c_flags);
 
     // --- Step 7: Linking ---
     exe.root_module.linkLibrary(raylib);
@@ -172,6 +210,7 @@ pub fn build(b: *std.Build) !void {
             .target = target,
             .optimize = optimize,
             .link_libc = true,
+            .sanitize_c = if (optimize == .Debug) .full else .off,
         }),
     });
 
@@ -185,17 +224,23 @@ pub fn build(b: *std.Build) !void {
 
     addCIncludePaths(unit_test.root_module, test_include_paths);
 
+    const test_flags = try combineFlags(b.allocator, &c_flags, if (optimize == .Debug) &debug_sanitizer_flags else &.{});
+    defer b.allocator.free(test_flags);
+
     addCSourceFiles(unit_test.root_module, &[_][]const u8{
         "tests/all_test.c",
         "tests/structures_test.c",
         "tests/theme_test.c",
-        "subprojects/unity/src/unity.c",
         "src/structures.c",
         "src/theme.c",
+    }, test_flags);
+    addCSourceFiles(unit_test.root_module, &[_][]const u8{
+        "subprojects/unity/src/unity.c",
         "subprojects/tomlc17/src/tomlc17.c",
         "subprojects/asprintf/asprintf.c",
     }, &c_flags);
     b.installArtifact(unit_test);
+    if (valgrind) unit_test.root_module.addCMacro("WITH_VALGRIND", "1");
 
     const run_unit_tests = b.addRunArtifact(unit_test);
     const test_step = b.step("test", "Run unit tests with Unity");

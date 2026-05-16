@@ -26,7 +26,7 @@ jobs:
           sudo apt-get install -y
           libasound2-dev libgl1-mesa-dev libglu1-mesa-dev
           libwayland-dev libxkbcommon-dev libegl-dev
-          wayland-protocols pkg-config
+          wayland-protocols pkg-config valgrind
       - name: Cleanup cache folders
         continue-on-error: true
         run: |
@@ -38,6 +38,16 @@ jobs:
           set +x
       - name: Unit tests
         run: zig build -j1 test
+      - name: Build unit test binary
+        run: zig build -j1 -Dvalgrind=true
+      - name: Valgrind on unit tests
+        run: |
+          valgrind --leak-check=full \
+            --show-leak-kinds=all \
+            --track-origins=yes \
+            --error-exitcode=1 \
+            --suppressions=valgrind/swindings.supp \
+            zig-out/bin/unit_tests
       - name: Build project 
         run: zig build --summary all -j1 --color off -freference-trace=0 -Doptimize=ReleaseSafe --verbose
 

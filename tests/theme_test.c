@@ -96,6 +96,7 @@ void test_theme_load_nonexistent_file_creates_it_and_loads_defaults(void) {
 
     TEST_ASSERT_EQUAL(16, theme.highlight.font.size);
     TEST_ASSERT_TRUE(ends_with(theme.highlight.font.file, DEFAULT_FONT_SUFFIX));
+    theme_free(&theme);
 }
 
 void test_theme_load_empty_file_returns_all_defaults(void) {
@@ -155,6 +156,7 @@ void test_theme_load_empty_file_returns_all_defaults(void) {
     TEST_ASSERT_EQUAL(16, res.theme.highlight.font.size);
     TEST_ASSERT_TRUE(
         ends_with(res.theme.highlight.font.file, DEFAULT_FONT_SUFFIX));
+    theme_free(&res.theme);
 }
 
 void test_global_overrides_section_if_not_set(void) {
@@ -168,6 +170,7 @@ void test_global_overrides_section_if_not_set(void) {
     TEST_ASSERT_EQUAL(
         20, res.theme.top.font.size); // Should NOT be overridden by global
     TEST_ASSERT_EQUAL(0x11, res.theme.top.background.color.r);
+    theme_free(&res.theme);
 }
 
 void test_section_overrides_global(void) {
@@ -179,6 +182,7 @@ void test_section_overrides_global(void) {
 
     TEST_ASSERT_EQUAL(0xaa, res.theme.top.background.color.r);
     TEST_ASSERT_NOT_EQUAL(0x11, res.theme.top.background.color.r);
+    theme_free(&res.theme);
 }
 
 void test_global_alpha_propagates_to_sections(void) {
@@ -190,6 +194,8 @@ void test_global_alpha_propagates_to_sections(void) {
     TEST_ASSERT_EQUAL(128, res.theme.top.background.color.a);
     TEST_ASSERT_EQUAL(128, res.theme.body.background.color.a);
     TEST_ASSERT_EQUAL(128, res.theme.bottom.background.color.a);
+
+    theme_free(&res.theme);
 }
 
 void test_section_alpha_propagates_to_body(void) {
@@ -200,6 +206,7 @@ void test_section_alpha_propagates_to_body(void) {
 
     // Should NOT propagate to body unless explicitly implemented
     TEST_ASSERT_EQUAL(180, res.theme.body.background.color.a);
+    theme_free(&res.theme);
 }
 
 typedef struct {
@@ -323,6 +330,7 @@ void test_theme_load_various_configs(void) {
             TEST_ASSERT_TRUE(
                 ends_with(res.theme.top.font.file, DEFAULT_FONT_SUFFIX));
         }
+        theme_free(&res.theme);
     }
 }
 
@@ -376,6 +384,7 @@ void test_alpha_applies_to_color_when_missing_alpha(void) {
     TEST_ASSERT_EQUAL(THEME_SUCCESS, res.error);
     TEST_ASSERT_EQUAL(128, res.theme.body.background.color.a);
     TEST_ASSERT_TRUE(res.theme.body.background.color.has_alpha);
+    theme_free(&res.theme);
 }
 
 void test_font_file_is_duplicated_between_layers(void) {
@@ -387,6 +396,7 @@ void test_font_file_is_duplicated_between_layers(void) {
     TEST_ASSERT_NOT_NULL(res.theme.body.font.file);
     TEST_ASSERT_NOT_NULL(res.theme.top.font.file);
     TEST_ASSERT_NOT_EQUAL(res.theme.body.font.file, res.theme.top.font.file);
+    theme_free(&res.theme);
 }
 
 void test_invalid_type_returns_parsing_error(void) {
@@ -395,6 +405,7 @@ void test_invalid_type_returns_parsing_error(void) {
     delete_temp_file(path);
 
     TEST_ASSERT_EQUAL(THEME_PARSING_ERROR, res.error);
+    theme_free(&res.theme);
 }
 
 void test_invalid_toml_syntax_returns_parsing_error(void) {
@@ -404,6 +415,7 @@ void test_invalid_toml_syntax_returns_parsing_error(void) {
     delete_temp_file(path);
 
     TEST_ASSERT_EQUAL(THEME_PARSING_ERROR, res.error);
+    theme_free(&res.theme);
 }
 
 void test_memory_allocation_failure(void) {
@@ -420,6 +432,7 @@ void test_font_file_not_found(void) {
 
     TEST_ASSERT_EQUAL(THEME_SUCCESS, res.error);
     TEST_ASSERT_NOT_NULL(res.theme.body.font.file);
+    theme_free(&res.theme);
 }
 
 void test_get_config_filepath_with_home(void) {
