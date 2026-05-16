@@ -399,9 +399,10 @@ void display(const KeyMapList *kml, const theme_t *theme) {
                         theme->bottom.font.size, spacing, "", labels);
         }
         EndDrawing();
-        #ifdef WITH_VALGRIND
-        if (RUNNING_ON_VALGRIND) break;
-        #endif
+#ifdef WITH_VALGRIND
+        if (RUNNING_ON_VALGRIND)
+            break;
+#endif
     }
     free(visible);
     free_search_result(&search_result);
