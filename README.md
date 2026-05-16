@@ -103,6 +103,44 @@ git submodule update --init --recursive
 zig build test
 ```
 
+### Memory checking
+
+`WITH_VALGRIND` is injected by passing `-Dvalgrind=true` to the build system.
+
+Build the binary with `-Dvalgrind=true`:
+
+```bash
+zig build -j1 -Dvalgrind=true
+```
+
+Then run valgrind against it:
+
+**On unit tests**
+
+```bash
+valgrind --leak-check=full \
+    --show-leak-kinds=all \
+    --track-origins=yes \
+    --error-exitcode=1 \
+    --suppressions=valgrind/swindings.supp \
+    zig-out/bin/unit_tests
+```
+
+**On executable**
+
+Requires a live Wayland compositor (cannot run in CI). Build with `-Dvalgrind=true`:
+
+```bash
+valgrind --leak-check=full \
+    --show-leak-kinds=all \
+    --track-origins=yes \
+    --error-exitcode=1 \
+    --suppressions=valgrind/swindings.supp \
+    --log-file=raw.log \
+    zig-out/bin/swindings
+```
+
+
 ### Generating compile_commands.json
 
 ```bash

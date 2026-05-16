@@ -1,0 +1,539 @@
+{   
+   Unsafe allocation with size of zero is implementation-defined
+   Memcheck:UnsafeZeroSize
+   fun:posix_memalign
+   obj:/usr/lib64/libnvidia-eglcore.so*
+   obj:/usr/lib64/libnvidia-eglcore.so*
+   obj:/usr/lib64/libnvidia-eglcore.so*
+   obj:/usr/lib64/libnvidia-eglcore.so*
+   fun:NvGlEglApiInit
+   obj:/usr/lib64/libEGL_nvidia.so*
+   obj:/usr/lib64/libEGL_nvidia.so*
+   obj:/usr/lib64/libEGL_nvidia.so*
+   obj:/usr/lib64/libEGL_nvidia.so*
+   obj:/usr/lib64/libEGL_nvidia.so*
+   fun:wlEglCreatePlatformData
+   fun:loadEGLExternalPlatform
+}
+
+{
+   realloc() with size 0
+   Memcheck:ReallocZero
+   fun:realloc
+   obj:/usr/lib64/libnvidia-eglcore.so*
+   obj:/usr/lib64/libnvidia-eglcore.so*
+   obj:/usr/lib64/libnvidia-eglcore.so*
+   obj:/usr/lib64/libnvidia-eglcore.so*
+   fun:NvGlEglApiInit
+   obj:/usr/lib64/libEGL_nvidia.so*
+   obj:/usr/lib64/libEGL_nvidia.so*
+   obj:/usr/lib64/libEGL_nvidia.so*
+   obj:/usr/lib64/libEGL_nvidia.so*
+   obj:/usr/lib64/libEGL_nvidia.so*
+   fun:wlEglCreatePlatformData
+   fun:loadEGLExternalPlatform
+}
+
+{
+   g_thread-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ... 
+   fun:g_thread_proxy
+   fun:start_thread
+   fun:clone
+}
+
+{
+   g_thread-definite
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ... 
+   fun:g_thread_proxy
+   fun:start_thread
+   fun:clone
+}
+
+{
+   g_thread-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ... 
+   fun:g_thread_proxy
+   fun:start_thread
+   fun:clone
+}
+
+{
+   g_thread-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ... 
+   fun:g_thread_proxy
+   fun:start_thread
+   fun:clone
+}
+
+{
+   Lost in loss record 
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:malloc
+   fun:allocate_dtv_entry
+   fun:allocate_and_init
+   fun:tls_get_addr_tail
+   fun:_dl_tlsdesc_dynamic_xsave
+   obj:*
+   obj:*
+   obj:/usr/lib64/libstdc++.so*
+}
+
+
+{
+   glib_all_g_malloc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:g_malloc
+}
+
+{
+   pango-reachable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:pango_*
+}
+
+{
+   pango-reachable
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:pango_*
+}
+
+{
+   pango-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:pango_*
+}
+
+{
+   pango-indirect
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:pango_*
+}
+
+{
+   cairo-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:*cairo_*
+}
+
+{
+   cairo-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:*cairo_*
+}
+
+{
+   cairo-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:*cairo_*
+}
+
+{
+   gdk-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:*gdk_*
+}
+
+{
+   gdk-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:*gdk_*
+}
+
+{
+   gdk-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:*gdk_*
+}
+
+
+{
+   gtk-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:*gtk_*
+}
+
+{
+   gtk-definite
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:*gtk_*
+}
+
+
+{
+   gtk-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:*gtk_*
+}
+
+{
+   gtk-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:*gtk_*
+}
+
+{
+   dl-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_dl_*
+}
+
+{
+   dl-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:_dl_*
+}
+
+{
+   dl-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:_dl_*
+}
+
+{
+   ft-load-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:FT_Load_*
+}
+
+{
+   ft-load-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:FT_Load_*
+}
+
+{
+   ft-load-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:FT_Load_*
+}
+
+{
+   xmlParse-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:xmlParse*
+}
+
+{
+   xmlParse-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:xmlParse*
+}
+
+{
+   xmlParse-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:xmlParse*
+}
+
+{
+   *glfw-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:*glfw*
+}
+
+{
+   *glfw-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:*glfw*
+}
+
+{
+   *glfw-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:*glfw*
+}
+
+
+{
+   *glfw-definite
+   Memcheck:Leak
+   match-leak-kinds: definite
+   ...
+   fun:*glfw*
+}
+
+{
+   *rust-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:*<*::*>*
+}
+
+{
+   *rust-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:*<*::*>*
+}
+
+{
+   *rust-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:*<*::*>*
+}
+
+
+{
+   gobj-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:g_*
+}
+
+{
+   gobj-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:g_*
+}
+
+{
+   gobj-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:g_*
+}
+{
+   _dbus-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:_dbus_*
+}
+
+{
+   _dbus-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:_dbus_*
+}
+
+{
+   _dbus-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:_dbus_*
+}
+
+{
+   wl-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:wl_*
+}
+
+{
+   wl-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:wl_*
+}
+
+{
+   wl-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:wl_*
+}
+
+{
+   af-reachable 
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   ...
+   fun:af_*
+}
+
+{
+   af-indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   ...
+   fun:af_*
+}
+
+{
+   wl-possible
+   Memcheck:Leak
+   match-leak-kinds: possible
+   ...
+   fun:af_*
+}
+
+
+{
+   fontconfig_values_reachable
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:malloc
+   ... 
+   fun:FcConfigValues
+}
+
+{
+   fontconfig_values_indirect
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   ... 
+   fun:FcConfigValues
+}
+
+{
+   fontconfig_values_possible
+   Memcheck:Leak
+   match-leak-kinds: possible 
+   fun:malloc
+   ... 
+   fun:FcConfigValues
+}
+
+{
+   runtime_driver_indirect_malloc
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:malloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+
+{
+   runtime_driver_reachable_tls
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:calloc
+   fun:pthread_setspecific@@GLIBC_2.34
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+
+{
+   runtime_driver_indirect_calloc
+   Memcheck:Leak
+   match-leak-kinds: indirect
+   fun:calloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+
+{
+   runtime_driver_definite_calloc
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+}
+

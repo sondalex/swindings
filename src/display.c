@@ -8,6 +8,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef WITH_VALGRIND
+#include <valgrind/valgrind.h>
+#endif
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -396,10 +399,14 @@ void display(const KeyMapList *kml, const theme_t *theme) {
                         theme->bottom.font.size, spacing, "", labels);
         }
         EndDrawing();
+        #ifdef WITH_VALGRIND
+        if (RUNNING_ON_VALGRIND) break;
+        #endif
     }
     free(visible);
     free_search_result(&search_result);
     UnloadFont(top_font);
     UnloadFont(body_font);
+    UnloadFont(bottom_font);
     CloseWindow();
 }
