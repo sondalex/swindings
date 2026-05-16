@@ -1,40 +1,4 @@
 {
-   Unsafe allocation with size of zero is implementation-defined
-   Memcheck:UnsafeZeroSize
-   fun:posix_memalign
-   obj:/usr/lib64/libnvidia-eglcore.so*
-   obj:/usr/lib64/libnvidia-eglcore.so*
-   obj:/usr/lib64/libnvidia-eglcore.so*
-   obj:/usr/lib64/libnvidia-eglcore.so*
-   fun:NvGlEglApiInit
-   obj:/usr/lib64/libEGL_nvidia.so*
-   obj:/usr/lib64/libEGL_nvidia.so*
-   obj:/usr/lib64/libEGL_nvidia.so*
-   obj:/usr/lib64/libEGL_nvidia.so*
-   obj:/usr/lib64/libEGL_nvidia.so*
-   fun:wlEglCreatePlatformData
-   fun:loadEGLExternalPlatform
-}
-
-{
-   realloc() with size 0
-   Memcheck:ReallocZero
-   fun:realloc
-   obj:/usr/lib64/libnvidia-eglcore.so*
-   obj:/usr/lib64/libnvidia-eglcore.so*
-   obj:/usr/lib64/libnvidia-eglcore.so*
-   obj:/usr/lib64/libnvidia-eglcore.so*
-   fun:NvGlEglApiInit
-   obj:/usr/lib64/libEGL_nvidia.so*
-   obj:/usr/lib64/libEGL_nvidia.so*
-   obj:/usr/lib64/libEGL_nvidia.so*
-   obj:/usr/lib64/libEGL_nvidia.so*
-   obj:/usr/lib64/libEGL_nvidia.so*
-   fun:wlEglCreatePlatformData
-   fun:loadEGLExternalPlatform
-}
-
-{
    g_thread-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
