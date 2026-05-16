@@ -8,6 +8,20 @@ const c_flags = [_][]const u8{
     "-Wextra",
     "-pedantic",
     "-D_POSIX_C_SOURCE=200809L",
+    "-Wshadow",
+    "-Wvla",
+    "-Wfloat-equal",
+    "-Wdouble-promotion",
+    "-Wformat=2",
+    "-Wformat-truncation",
+    "-Wundef",
+    "-Wconversion",
+    "-Wsign-conversion",
+    "-Wnull-dereference",
+    "-Wuninitialized",
+    "-Winit-self",
+    "-Wstrict-prototypes",
+    "-Wold-style-definition",
 };
 
 const src_files = [_][]const u8{

@@ -1,4 +1,4 @@
-{   
+{
    Unsafe allocation with size of zero is implementation-defined
    Memcheck:UnsafeZeroSize
    fun:posix_memalign
@@ -35,10 +35,10 @@
 }
 
 {
-   g_thread-reachable 
+   g_thread-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
-   ... 
+   ...
    fun:g_thread_proxy
    fun:start_thread
    fun:clone
@@ -48,7 +48,7 @@
    g_thread-definite
    Memcheck:Leak
    match-leak-kinds: definite
-   ... 
+   ...
    fun:g_thread_proxy
    fun:start_thread
    fun:clone
@@ -58,7 +58,7 @@
    g_thread-possible
    Memcheck:Leak
    match-leak-kinds: possible
-   ... 
+   ...
    fun:g_thread_proxy
    fun:start_thread
    fun:clone
@@ -68,14 +68,14 @@
    g_thread-indirect
    Memcheck:Leak
    match-leak-kinds: indirect
-   ... 
+   ...
    fun:g_thread_proxy
    fun:start_thread
    fun:clone
 }
 
 {
-   Lost in loss record 
+   Lost in loss record
    Memcheck:Leak
    match-leak-kinds: possible
    fun:malloc
@@ -131,7 +131,7 @@
 }
 
 {
-   cairo-reachable 
+   cairo-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -155,7 +155,7 @@
 }
 
 {
-   gdk-reachable 
+   gdk-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -180,7 +180,7 @@
 
 
 {
-   gtk-reachable 
+   gtk-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -213,7 +213,7 @@
 }
 
 {
-   dl-reachable 
+   dl-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -237,7 +237,7 @@
 }
 
 {
-   ft-load-reachable 
+   ft-load-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -261,7 +261,7 @@
 }
 
 {
-   xmlParse-reachable 
+   xmlParse-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -285,7 +285,7 @@
 }
 
 {
-   *glfw-reachable 
+   *glfw-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -318,7 +318,7 @@
 }
 
 {
-   *rust-reachable 
+   *rust-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -343,7 +343,7 @@
 
 
 {
-   gobj-reachable 
+   gobj-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -366,7 +366,7 @@
    fun:g_*
 }
 {
-   _dbus-reachable 
+   _dbus-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -390,7 +390,7 @@
 }
 
 {
-   wl-reachable 
+   wl-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -414,7 +414,7 @@
 }
 
 {
-   af-reachable 
+   af-reachable
    Memcheck:Leak
    match-leak-kinds: reachable
    ...
@@ -443,7 +443,7 @@
    Memcheck:Leak
    match-leak-kinds: reachable
    fun:malloc
-   ... 
+   ...
    fun:FcConfigValues
 }
 
@@ -452,16 +452,16 @@
    Memcheck:Leak
    match-leak-kinds: indirect
    fun:malloc
-   ... 
+   ...
    fun:FcConfigValues
 }
 
 {
    fontconfig_values_possible
    Memcheck:Leak
-   match-leak-kinds: possible 
+   match-leak-kinds: possible
    fun:malloc
-   ... 
+   ...
    fun:FcConfigValues
 }
 
