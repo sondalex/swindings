@@ -97,7 +97,7 @@ static font_container_t load_font_from_paths(const stringlist_t *paths,
 
         if (FileExists(path)) {
             Font font = LoadFontEx(path, size, codepoints, total);
-            printf("Loading font %s", path);
+            printf("Loading font %s\n", path);
             return (font_container_t){.font = font, .error = DISPLAY_SUCCESS};
         }
     }

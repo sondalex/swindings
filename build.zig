@@ -49,6 +49,17 @@ const debug_sanitizer_flags = [_][]const u8{
     // "-fsanitize=leak", # NOTE: valgrind is used instead
 };
 
+const raylib_disable_flags = [_][]const u8{
+    "SUPPORT_TRACELOG", // NOTE: Remove this line for debugging
+    "SUPPORT_MODULE_RMODELS",
+    "SUPPORT_MODULE_RAUDIO",
+    "SUPPORT_CAMERA_SYSTEM",
+    "SUPPORT_GESTURES_SYSTEM",
+    "SUPPORT_SCREEN_CAPTURE",
+    "SUPPORT_IMAGE_EXPORT",
+    "SUPPORT_IMAGE_GENERATION",
+};
+
 fn combineFlags(allocator: std.mem.Allocator, a: []const []const u8, b: []const []const u8) ![]const []const u8 {
     var list: std.ArrayList([]const u8) = .empty;
     try list.appendSlice(allocator, a);
@@ -160,6 +171,10 @@ pub fn build(b: *std.Build) !void {
         .linux_display_backend = .Wayland,
     });
     const raylib = raylib_dep.artifact("raylib");
+    for (raylib_disable_flags) |flag| {
+        raylib.root_module.addCMacro(flag, "0");
+    }
+
     addSystemLibraryPaths(raylib.root_module, io);
 
     // --- Step 4: Executable ---
