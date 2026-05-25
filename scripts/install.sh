@@ -11,9 +11,26 @@ SHARE_DIR="$DEFAULT_SHARE_DIR"
 ARCH="linux-x86_64"
 APP="swindings"
 
-# Color functions
+# Color / progress functions
 green() { echo -e "\033[0;32m$1\033[0m"; }
-red() { echo -e "\033[0;31m$1\033[0m"; }
+red()   { echo -e "\033[0;31m$1\033[0m"; }
+dim()   { echo -e "\033[2m$1\033[0m"; }
+
+TOTAL_STEPS=6
+CURRENT_STEP=0
+step() {
+  CURRENT_STEP=$((CURRENT_STEP + 1))
+  echo -e "\033[1m[$CURRENT_STEP/$TOTAL_STEPS]\033[0m $1"
+}
+
+# Use --progress-bar only when stdout is a terminal
+curl_download() {
+  if [ -t 1 ]; then
+    curl -fL --progress-bar "$@"
+  else
+    curl -fsSL "$@"
+  fi
+}
 
 usage() {
   cat <<EOF
@@ -45,6 +62,7 @@ done
 
 # Find GH release URL
 API_URL="https://api.github.com/repos/$OWNER/swindings/releases"
+step "Resolving version..."
 if [ -z "$VERSION" ]; then
   VERSION=$(curl -fsSL $API_URL/latest | grep '"tag_name":' | cut -d '"' -f4)
 else
@@ -52,6 +70,7 @@ else
   VERSION=$(curl -fsSL $API_URL | grep -F '"tag_name": "v$VERSION"' | head -1 | awk -F'"' '{print $4}')
   [ -z "$VERSION" ] && red "Version not found!" && exit 1
 fi
+dim "  -> $VERSION"
 
 TAR="swindings-${VERSION#v}-$ARCH.tar.gz"
 URL="https://github.com/$OWNER/swindings/releases/download/v${VERSION#v}/$TAR"
@@ -59,10 +78,11 @@ URL_SHA="${URL}.sha256"
 
 TMPDIR=$(mktemp -d)
 cd "$TMPDIR"
-echo "Downloading $TAR..."
-curl -fsSLO "$URL"
-echo "Downloading checksum..."
-curl -fsSLO "$URL_SHA"
+step "Downloading archive..."
+curl_download -O "$URL"
+step "Downloading checksum..."
+curl_download -O "$URL_SHA"
+step "Verifying checksum..."
 # Verify checksum (BSD format)
 CHECKSUM_BSD=$(cat $TAR.sha256 | awk '{print $4}')
 CALC=$(sha256sum $TAR | awk '{print $1}')
@@ -70,11 +90,13 @@ if [[ "$CALC" != "$CHECKSUM_BSD" ]]; then
   red "Checksum verification failed! Aborting."
   exit 2
 fi
-green "Checksum verified."
+green "  Checksum OK."
 
-tar -xzvf $TAR
+step "Extracting archive..."
+tar -xzf $TAR
 # Location inside archive: bin/swindings
 [ ! -f bin/swindings ] && red "Build archive corrupt!" && exit 3
+step "Installing files..."
 mkdir -p "$BIN_DIR"
 cp bin/swindings "$BIN_DIR/"
 chmod +x "$BIN_DIR/swindings"
@@ -83,6 +105,6 @@ chmod +x "$BIN_DIR/swindings"
 mkdir -p "$SHARE_DIR"
 cp -r share/. "$SHARE_DIR/"
 
-green "$APP was installed to $BIN_DIR/swindings."
+green "$APP installed to $BIN_DIR/swindings."
 green "Shared data installed to $SHARE_DIR."
 
