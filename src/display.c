@@ -58,9 +58,9 @@ size_t font_paths_len(const char *arr[]) {
     return i;
 }
 
-static font_container_t load_system_font(int size);
+static font_container_t load_system_font(float size);
 static void format_keys(const KeyMap *km, char *buf, size_t bufsize);
-static Scroll scroll_create(int content_height, int window_height);
+static Scroll scroll_create(float content_height, float window_height);
 static void scroll_update(Scroll *s);
 static void draw_top(theme_color_t color, theme_color_t text_color, Font font,
                      float font_size, float spacing);
@@ -75,7 +75,7 @@ static void draw_body(theme_color_t color, theme_color_t text_color,
                       const size_t count, float offset_y);
 
 static font_container_t load_font_from_paths(const stringlist_t *paths,
-                                             int size) {
+                                             float size) {
     if (!paths || paths->count == 0) {
         return (font_container_t){.font = GetFontDefault(),
                                   .error = DISPLAY_STRINGLIST_UNINITIALIZED};
@@ -90,13 +90,13 @@ static font_container_t load_font_from_paths(const stringlist_t *paths,
         codepoints[i] = 32 + i;
 
     memcpy(&codepoints[ascii_count], key_codepoints,
-           key_codepoints_count * sizeof(int));
+           (size_t)key_codepoints_count * sizeof(int));
 
     for (size_t i = 0; i < paths->count; i++) {
         const char *path = paths->items[i];
 
         if (FileExists(path)) {
-            Font font = LoadFontEx(path, size, codepoints, total);
+            Font font = LoadFontEx(path, (int)size, codepoints, total);
             printf("Loading font %s\n", path);
             return (font_container_t){.font = font, .error = DISPLAY_SUCCESS};
         }
@@ -106,7 +106,7 @@ static font_container_t load_font_from_paths(const stringlist_t *paths,
                               .error = DISPLAY_FONT_LOAD_ERROR};
 }
 
-static font_container_t load_system_font(int size) {
+static font_container_t load_system_font(float size) {
     stringlist_t list;
     stringlist_init(&list);
 
@@ -147,6 +147,9 @@ static Font load_best_font(const theme_font_t *font) {
 }
 
 static void format_keys(const KeyMap *km, char *buf, size_t bufsize) {
+    if (km == NULL) {
+        return;
+    }
     buf[0] = '\0';
     for (size_t j = 0; j < km->modifier_count; j++) {
         strncat(buf, key_to_symbol(km->modifiers[j]),
@@ -156,7 +159,7 @@ static void format_keys(const KeyMap *km, char *buf, size_t bufsize) {
     strncat(buf, key_to_symbol(km->main_key), bufsize - strlen(buf) - 1);
 }
 
-static Scroll scroll_create(int content_height, int window_height) {
+static Scroll scroll_create(float content_height, float window_height) {
     float min = -(content_height - window_height);
     return (Scroll){.y = 0, .min = min > 0 ? 0 : min};
 }
@@ -197,6 +200,9 @@ static void draw_text_highlighted(Font font, visible_item_t item,
                                   float spacing, Color text_color,
                                   Color highlight_text_color,
                                   Color highlight_color) {
+    if (item.km == NULL) {
+        return;
+    }
     const char *text = item.km->description;
     if (text == NULL)
         return;
@@ -330,7 +336,8 @@ void display(const KeyMapList *kml, const theme_t *theme) {
 
     float spacing = 1.0f;
 
-    int content_height = PADDING + (int)kml->count * ROW_HEIGHT + PADDING;
+    float content_height =
+        (float)(PADDING + (int)kml->count * ROW_HEIGHT + PADDING);
     Scroll scroll = scroll_create(content_height, WINDOW_HEIGHT);
 
     Font top_font = load_best_font(&theme->top.font);

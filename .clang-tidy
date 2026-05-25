@@ -1,0 +1,16 @@
+---
+Checks: >
+  clang-analyzer-*,
+  bugprone-*,
+  cert-*,
+  -cert-dcl37-c,
+  -cert-dcl51-cpp
+
+HeaderFilterRegex: '^(.*/)?src/.*'
+ExcludeHeaderFilterRegex: '/(external|thirdparty|vendor|deps|build|CMakeFiles|conan| vcpkg|subprojects)/'
+
+WarningsAsErrors: '*'
+
+CheckOptions:
+  - key: bugprone-easily-swappable-parameters.MinimumLength
+    value: '3'

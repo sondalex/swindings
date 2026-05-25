@@ -92,7 +92,7 @@ void free_search_result(search_result_t *result) {
                 intlist_delete(result->positions[i]); /* uses new helper */
             }
         }
-        free(result->positions);
+        free((intlist_t *)(result->positions));
     }
     free(result->mask);
     memset(result, 0, sizeof(*result));

@@ -17,7 +17,7 @@ static void capitalize_into(const char *src, char *buf) {
     size_t len = strlen(src);
     memcpy(buf, src, len);
     buf[len] = '\0';
-    buf[0] = toupper((unsigned char)buf[0]);
+    buf[0] = (char)toupper((unsigned char)buf[0]);
 }
 
 config_error_t config_read_file(const char *filepath, stringlist_t *out) {
@@ -46,14 +46,18 @@ config_error_t config_read_file(const char *filepath, stringlist_t *out) {
             pos[sizeof(PATTERN) - 1] == ' ') {
             if (stringlist_append(out, pos) != 0) {
                 free(line);
-                fclose(fp);
+                int err = fclose(fp);
+                if (err)
+                    return CONFIG_ERR_IO;
                 return CONFIG_ERR_OUT_OF_MEMORY;
             }
         }
     }
 
     free(line);
-    fclose(fp);
+    int err = fclose(fp);
+    if (err)
+        return CONFIG_ERR_IO;
     return CONFIG_SUCCESS;
 }
 
@@ -92,7 +96,7 @@ void keymap_free(KeyMap *km) {
     free(km->main_key);
     for (size_t i = 0; i < km->modifier_count; i++)
         free(km->modifiers[i]);
-    free(km->modifiers);
+    free((char *)(km->modifiers));
     free(km->description);
 }
 
@@ -120,14 +124,14 @@ config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
         if (!space)
             continue;
 
-        key_combo = strndup(pos, space - pos);
+        key_combo = strndup(pos, (size_t)(space - pos));
         if (!key_combo)
             goto fail;
 
         size_t len = strlen(space + 1); // Length after the space
         desc = malloc(len + 1);
         if (!desc) {
-            return CONFIG_ERR_ALLOC_FAILED;
+            goto fail;
         }
         capitalize_into(space + 1, desc);
         if (!desc)
@@ -139,8 +143,8 @@ config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
 
         char *tok = strtok(tmp, "+");
         while (tok) {
-            char **new_tokens =
-                realloc(tokens, (token_count + 1) * sizeof(char *));
+            char **new_tokens = (char **)(realloc(
+                (char *)tokens, (token_count + 1) * sizeof(char *)));
             if (!new_tokens)
                 goto fail;
             tokens = new_tokens;
@@ -157,6 +161,12 @@ config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
         free(key_combo);
         key_combo = NULL;
 
+        if (token_count == 0) {
+            free(desc);
+            free((char *)tokens);
+            return CONFIG_ERR_ALLOC_FAILED; // or continue;
+        }
+
         KeyMap km = {0};
         km.description = desc;
         km.main_key = tokens[token_count - 1];
@@ -172,7 +182,7 @@ config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
     fail:
         for (size_t j = 0; j < token_count; j++)
             free(tokens[j]);
-        free(tokens);
+        free((char *)tokens);
         free(tmp);
         free(key_combo);
         free(desc);

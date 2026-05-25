@@ -1,6 +1,9 @@
 #ifndef KEYICON_H
 #define KEYICON_H
 
+#define MAX_CODEPOINTS 512
+
+#include <stddef.h>
 typedef struct {
     const char *name;
     const char *symbol;

@@ -15,6 +15,7 @@ typedef enum {
     CONFIG_ERR_INVALID_FORMAT,
     CONFIG_ERR_INVALID_ARGUMENT,
     CONFIG_ERR_ALLOC_FAILED,
+    CONFIG_ERR_IO,
 } config_error_t;
 
 typedef struct {

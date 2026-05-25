@@ -41,31 +41,53 @@ void parse_hex_color(const char *hex_str, theme_color_t *c) {
     if (hex_str == NULL || c == NULL)
         return;
 
-    if (hex_str[0] != '#') {
+    if (hex_str[0] != '#')
         return;
-    }
-    hex_str++;
 
-    unsigned int r = 0, g = 0, b = 0, a = 255;
+    hex_str++; // skip '#'
 
-    if (sscanf(hex_str, "%02x%02x%02x%02x", &r, &g, &b, &a) == 4) {
-        c->r = (uint8_t)r;
-        c->g = (uint8_t)g;
-        c->b = (uint8_t)b;
-        c->a = (uint8_t)a;
+    size_t len = strlen(hex_str);
+    if (len != 6 && len != 8)
+        return;
+
+    char buf[3] = {0};
+    char *endptr;
+    unsigned long v;
+
+    errno = 0;
+
+    buf[0] = hex_str[0];
+    buf[1] = hex_str[1];
+    v = strtoul(buf, &endptr, 16);
+    if (errno != 0 || *endptr != '\0')
+        return;
+    c->r = (uint8_t)v;
+
+    buf[0] = hex_str[2];
+    buf[1] = hex_str[3];
+    v = strtoul(buf, &endptr, 16);
+    if (errno != 0 || *endptr != '\0')
+        return;
+    c->g = (uint8_t)v;
+
+    buf[0] = hex_str[4];
+    buf[1] = hex_str[5];
+    v = strtoul(buf, &endptr, 16);
+    if (errno != 0 || *endptr != '\0')
+        return;
+    c->b = (uint8_t)v;
+
+    if (len == 8) {
+        buf[0] = hex_str[6];
+        buf[1] = hex_str[7];
+        v = strtoul(buf, &endptr, 16);
+        if (errno != 0 || *endptr != '\0')
+            return;
+        c->a = (uint8_t)v;
         c->has_alpha = true;
-        return;
+    } else {
+        c->has_alpha = false;
     }
-
-    // Fall back to 6-digit format: #RRGGBB (alpha stays 255)
-    if (sscanf(hex_str, "%02x%02x%02x", &r, &g, &b) == 3) {
-        c->r = (uint8_t)r;
-        c->g = (uint8_t)g;
-        c->b = (uint8_t)b;
-        return;
-    }
-
-    return;
 }
 
 static char *get_directory(const char *filepath) {
@@ -117,7 +139,10 @@ static theme_error_t create_file(const char *filepath, bool create_dir) {
     if (!fd) {
         return THEME_IO_ERROR;
     }
-    fclose(fd);
+    int err = fclose(fd);
+    if (err) {
+        return THEME_IO_ERROR;
+    }
     return THEME_SUCCESS;
 }
 
@@ -275,6 +300,9 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
         parse_hex_color(font_color.u.str.ptr, &font.color);
         font.has_color = true;
     } else if (font_color.type != TOML_UNKNOWN) {
+        if (font.file != NULL) {
+            free(font.file);
+        }
         return THEME_PARSING_ERROR;
     }
 
@@ -464,13 +492,18 @@ char *theme_get_config_filepath(void) {
     size_t len_home = strlen(home);
     int trim = (len_home > 0 && home[len_home - 1] == '/');
 
-    size_t total_len = len_home - trim + strlen(suffix) + 1;
+    size_t total_len = len_home - (size_t)trim + strlen(suffix) + 1;
 
     char *path = malloc(total_len);
     if (!path)
         return NULL;
 
-    snprintf(path, total_len, "%.*s%s", (int)(len_home - trim), home, suffix);
+    int count = snprintf(path, total_len, "%.*s%s",
+                         (int)(len_home - (size_t)trim), home, suffix);
+    if (count < 0) {
+        free(path);
+        return NULL;
+    }
 
     return path;
 }
