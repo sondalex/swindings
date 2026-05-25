@@ -10,9 +10,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-      - name: "Clangd install"
-        run: sudo apt install clang-format
-      - name: "Clangd format"
+      - name: "Clang tools install"
+        run: sudo apt-get install -y clang-format clang-tidy
+      - name: "Clang format"
         run: git ls-files -z '*.c' | xargs -0 clang-format --dry-run --Werror
       - name: "Download submodules"
         run: git submodule update --init --recursive
@@ -27,6 +27,14 @@ jobs:
           libasound2-dev libgl1-mesa-dev libglu1-mesa-dev
           libwayland-dev libxkbcommon-dev libegl-dev
           wayland-protocols pkg-config valgrind
+      - name: Generate compile_commands.json
+        run: zig build cdb
+      - name: "Clang-tidy static analysis"
+        run: >
+          clang-tidy
+          src/cli.c src/config.c src/display.c src/keyicon.c
+          src/main.c src/search.c src/structures.c src/theme.c
+          -p compile_commands.json
       - name: Cleanup cache folders
         continue-on-error: true
         run: |

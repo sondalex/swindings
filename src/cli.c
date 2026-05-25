@@ -54,6 +54,8 @@ bool parse_cli(int argc, char **argv, cli_args *args) {
         case '?':
             cag_option_print_error(&context, stderr);
             return false;
+        default:
+            break;
         }
     }
 

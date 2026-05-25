@@ -12,6 +12,7 @@ typedef enum {
     Success = 0,
     ConfigError,
     ThemeError,
+    IOError,
 } Error;
 
 int main(int argc, char *argv[]) {
@@ -34,18 +35,22 @@ int main(int argc, char *argv[]) {
         err = theme_load_from_config(&theme);
     }
     if (err != THEME_SUCCESS) {
-        fprintf(stderr, "Failed to set THEME: %s\n", theme_error_str(err));
+        if (fprintf(stderr, "Failed to set THEME: %s\n", theme_error_str(err)))
+            return IOError;
+
         return ThemeError;
     }
 
     char *filepath = config_get_sway_filepath();
     if (!filepath) {
-        fprintf(stderr, "failed to determine sway config path\n");
+        if (fprintf(stderr, "failed to determine sway config path\n"))
+            return IOError;
         return ConfigError;
     }
 
     if (config_read_file(filepath, &list) != 0) {
-        fprintf(stderr, "failed to read file\n");
+        if (fprintf(stderr, "failed to read file\n"))
+            return IOError;
         free(filepath);
         stringlist_free(&list);
         return ConfigError;
@@ -56,7 +61,8 @@ int main(int argc, char *argv[]) {
     keymaplist_init(&kml);
 
     if (parse_key_maps(&list, &kml) != 0) {
-        fprintf(stderr, "failed to parse key maps\n");
+        if (fprintf(stderr, "failed to parse key maps\n"))
+            return IOError;
         stringlist_free(&list);
         return 1;
     }

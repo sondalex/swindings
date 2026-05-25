@@ -146,3 +146,22 @@ valgrind --leak-check=full \
 ```bash
 zig build cdb
 ```
+
+### Static analysis (clang-tidy)
+
+Requires `clang-tidy` and a `compile_commands.json`. Generate the compilation
+database first:
+
+```bash
+zig build cdb
+```
+
+Then run clang-tidy against the project sources:
+
+```bash
+clang-tidy \
+    src/cli.c src/config.c src/display.c src/keyicon.c \
+    src/main.c src/search.c src/structures.c src/theme.c \
+    -p compile_commands.json
+```
+

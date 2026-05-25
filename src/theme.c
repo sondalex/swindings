@@ -41,31 +41,67 @@ void parse_hex_color(const char *hex_str, theme_color_t *c) {
     if (hex_str == NULL || c == NULL)
         return;
 
-    if (hex_str[0] != '#') {
+    if (hex_str[0] != '#')
         return;
+
+    hex_str++; // skip '#'
+
+    size_t len = strlen(hex_str);
+    if (len != 6 && len != 8)
+        return;
+
+    unsigned long r = 0, g = 0, b = 0, a = 255;
+    char *endptr;
+    bool success = false;
+
+    errno = 0;
+
+    // Try 8-digit format: #RRGGBBAA
+    if (len == 8) {
+        r = strtoul(hex_str, &endptr, 16);
+        if (endptr != hex_str + 2)
+            goto fail;
+
+        g = strtoul(endptr, &endptr, 16);
+        if (endptr != hex_str + 4)
+            goto fail;
+
+        b = strtoul(endptr, &endptr, 16);
+        if (endptr != hex_str + 6)
+            goto fail;
+
+        a = strtoul(endptr, &endptr, 16);
+        if (endptr != hex_str + 8 || *endptr != '\0')
+            goto fail;
+
+        c->has_alpha = true;
+        success = true;
     }
-    hex_str++;
+    // Try 6-digit format: #RRGGBB
+    else if (len == 6) {
+        r = strtoul(hex_str, &endptr, 16);
+        if (endptr != hex_str + 2)
+            goto fail;
 
-    unsigned int r = 0, g = 0, b = 0, a = 255;
+        g = strtoul(endptr, &endptr, 16);
+        if (endptr != hex_str + 4)
+            goto fail;
 
-    if (sscanf(hex_str, "%02x%02x%02x%02x", &r, &g, &b, &a) == 4) {
+        b = strtoul(endptr, &endptr, 16);
+        if (endptr != hex_str + 6 || *endptr != '\0')
+            goto fail;
+
+        c->has_alpha = false;
+        success = true;
+    }
+
+fail:
+    if (success && errno == 0) {
         c->r = (uint8_t)r;
         c->g = (uint8_t)g;
         c->b = (uint8_t)b;
         c->a = (uint8_t)a;
-        c->has_alpha = true;
-        return;
     }
-
-    // Fall back to 6-digit format: #RRGGBB (alpha stays 255)
-    if (sscanf(hex_str, "%02x%02x%02x", &r, &g, &b) == 3) {
-        c->r = (uint8_t)r;
-        c->g = (uint8_t)g;
-        c->b = (uint8_t)b;
-        return;
-    }
-
-    return;
 }
 
 static char *get_directory(const char *filepath) {
@@ -117,7 +153,10 @@ static theme_error_t create_file(const char *filepath, bool create_dir) {
     if (!fd) {
         return THEME_IO_ERROR;
     }
-    fclose(fd);
+    int err = fclose(fd);
+    if (err) {
+        return THEME_IO_ERROR;
+    }
     return THEME_SUCCESS;
 }
 
@@ -275,6 +314,9 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
         parse_hex_color(font_color.u.str.ptr, &font.color);
         font.has_color = true;
     } else if (font_color.type != TOML_UNKNOWN) {
+        if (font.file != NULL) {
+            free(font.file);
+        }
         return THEME_PARSING_ERROR;
     }
 
@@ -464,13 +506,18 @@ char *theme_get_config_filepath(void) {
     size_t len_home = strlen(home);
     int trim = (len_home > 0 && home[len_home - 1] == '/');
 
-    size_t total_len = len_home - trim + strlen(suffix) + 1;
+    size_t total_len = len_home - (size_t)trim + strlen(suffix) + 1;
 
     char *path = malloc(total_len);
     if (!path)
         return NULL;
 
-    snprintf(path, total_len, "%.*s%s", (int)(len_home - trim), home, suffix);
+    int count = snprintf(path, total_len, "%.*s%s",
+                         (int)(len_home - (size_t)trim), home, suffix);
+    if (count < 0) {
+        free(path);
+        return NULL;
+    }
 
     return path;
 }

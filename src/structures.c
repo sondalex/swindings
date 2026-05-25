@@ -8,7 +8,8 @@
 stringlist_error_t stringlist_append(stringlist_t *list, const char *s) {
     if (list->count == list->capacity) {
         size_t new_cap = list->capacity ? list->capacity * 2 : 8;
-        char **tmp = (char **)realloc(list->items, new_cap * sizeof(*tmp));
+        char **tmp =
+            (char **)realloc((char *)(list->items), new_cap * sizeof(*tmp));
         if (!tmp)
             return STRINGLIST_ERR_ALLOC_FAILED;
         list->items = tmp;
@@ -33,7 +34,7 @@ void stringlist_free(stringlist_t *list) {
     if (list->items) {
         for (size_t i = 0; i < list->count; i++)
             free(list->items[i]);
-        free(list->items);
+        free((char *)(list->items));
     }
     stringlist_init(list);
 }
@@ -134,7 +135,8 @@ size_t get_segments(const char *text, const intlist_t *positions,
     segment_type_t tmp = in_intlist(0, positions) ? HIGHLIGHTED : NORMAL;
 
     for (size_t i = 0; i < len; ++i) {
-        segment_type_t type = in_intlist(i, positions) ? HIGHLIGHTED : NORMAL;
+        segment_type_t type =
+            in_intlist((int)i, positions) ? HIGHLIGHTED : NORMAL;
 
         if (type != tmp) {
             segment_t segment = {
