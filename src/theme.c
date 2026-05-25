@@ -50,57 +50,43 @@ void parse_hex_color(const char *hex_str, theme_color_t *c) {
     if (len != 6 && len != 8)
         return;
 
-    unsigned long r = 0, g = 0, b = 0, a = 255;
+    char buf[3] = {0};
     char *endptr;
-    bool success = false;
+    unsigned long v;
 
     errno = 0;
 
-    // Try 8-digit format: #RRGGBBAA
+    buf[0] = hex_str[0];
+    buf[1] = hex_str[1];
+    v = strtoul(buf, &endptr, 16);
+    if (errno != 0 || *endptr != '\0')
+        return;
+    c->r = (uint8_t)v;
+
+    buf[0] = hex_str[2];
+    buf[1] = hex_str[3];
+    v = strtoul(buf, &endptr, 16);
+    if (errno != 0 || *endptr != '\0')
+        return;
+    c->g = (uint8_t)v;
+
+    buf[0] = hex_str[4];
+    buf[1] = hex_str[5];
+    v = strtoul(buf, &endptr, 16);
+    if (errno != 0 || *endptr != '\0')
+        return;
+    c->b = (uint8_t)v;
+
     if (len == 8) {
-        r = strtoul(hex_str, &endptr, 16);
-        if (endptr != hex_str + 2)
-            goto fail;
-
-        g = strtoul(endptr, &endptr, 16);
-        if (endptr != hex_str + 4)
-            goto fail;
-
-        b = strtoul(endptr, &endptr, 16);
-        if (endptr != hex_str + 6)
-            goto fail;
-
-        a = strtoul(endptr, &endptr, 16);
-        if (endptr != hex_str + 8 || *endptr != '\0')
-            goto fail;
-
+        buf[0] = hex_str[6];
+        buf[1] = hex_str[7];
+        v = strtoul(buf, &endptr, 16);
+        if (errno != 0 || *endptr != '\0')
+            return;
+        c->a = (uint8_t)v;
         c->has_alpha = true;
-        success = true;
-    }
-    // Try 6-digit format: #RRGGBB
-    else if (len == 6) {
-        r = strtoul(hex_str, &endptr, 16);
-        if (endptr != hex_str + 2)
-            goto fail;
-
-        g = strtoul(endptr, &endptr, 16);
-        if (endptr != hex_str + 4)
-            goto fail;
-
-        b = strtoul(endptr, &endptr, 16);
-        if (endptr != hex_str + 6 || *endptr != '\0')
-            goto fail;
-
+    } else {
         c->has_alpha = false;
-        success = true;
-    }
-
-fail:
-    if (success && errno == 0) {
-        c->r = (uint8_t)r;
-        c->g = (uint8_t)g;
-        c->b = (uint8_t)b;
-        c->a = (uint8_t)a;
     }
 }
 
