@@ -263,7 +263,6 @@ pub fn build(b: *std.Build) !void {
         "src/theme.c",
         "src/utils.c",
         "src/config.c",
-        "src/cli.c",
     }, test_flags);
     addCSourceFiles(unit_test.root_module, &[_][]const u8{
         "subprojects/unity/src/unity.c",
