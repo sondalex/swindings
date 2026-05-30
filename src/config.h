@@ -7,6 +7,7 @@
 #endif
 
 
+#include <stdbool.h>
 #include <stddef.h>
 #include "structures.h"
 
@@ -22,6 +23,8 @@ typedef enum {
     CONFIG_ERR_INVALID_ARGUMENT,
     CONFIG_ERR_ALLOC_FAILED,
     CONFIG_ERR_IO,
+    CONFIG_ERR_GLOB_FAILED,
+    CONFIG_ERR_ENV_FAILED,
 } config_error_t;
 
 typedef struct {
@@ -56,7 +59,7 @@ void keymaplist_free(KeyMapList *list);
 void keymap_free(KeyMap *km);
 
 
-config_error_t config_read_file(const char *filepath, stringlist_t *out);
+config_error_t config_read_file(const char *filepath, stringlist_t *out, bool follow_includes);
 
 // Returns the path to the sway config file, or NULL on error.
 // Caller must free() the returned string.

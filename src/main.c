@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
         return ConfigError;
     }
 
-    if (config_read_file(filepath, &list) != 0) {
+    if (config_read_file(filepath, &list, args.follow_includes) != 0) {
         if (fprintf(stderr, "failed to read file\n"))
             return IOError;
         free(filepath);
