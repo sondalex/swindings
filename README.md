@@ -100,7 +100,7 @@ cp config/tokyo-night.toml ~/.config/swindings/config.toml
 Add keymap to your `~/.config/sway/config`:
 
 ```ini
-bindsym $mod+k+m swindings
+bindsym $mod+k+m exec swindings
 ```
 
 ## Building from source
