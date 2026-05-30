@@ -6,7 +6,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-
 void test_file_exists_for_existing_file(void) {
     char tmpl[] = "/tmp/config_test_exists_XXXXXX";
     int fd = mkstemp(tmpl);

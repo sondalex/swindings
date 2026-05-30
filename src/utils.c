@@ -1,9 +1,8 @@
 #include "utils.h"
-#include <stdbool.h>
-#include <unistd.h>
 #include <limits.h>
+#include <stdbool.h>
 #include <string.h>
-
+#include <unistd.h>
 
 bool file_exists(const char *filepath) {
     return (bool)(access(filepath, F_OK) == 0);
