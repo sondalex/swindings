@@ -51,11 +51,26 @@ config_error_t config_read_file(const char *filepath, stringlist_t *out,
             while (*pattern == ' ' || *pattern == '\t')
                 pattern++;
             glob_t globbuf;
-            int ret = glob(pattern, GLOB_TILDE | GLOB_NOCHECK, NULL, &globbuf);
+            char *expanded = NULL;
+            if (pattern[0] == '~') {
+                const char *home = getenv("HOME");
+                if (!home) {
+                    return CONFIG_ERR_ENV_FAILED;
+                }
+                if (asprintf(&expanded, "%s%s", home, pattern + 1) < 0) {
+                    return CONFIG_ERR_ALLOC_FAILED;
+                }
+                pattern = expanded;
+            }
+            int ret = glob(pattern, GLOB_NOCHECK, NULL, &globbuf);
+            free(expanded);
             if (ret != 0 && ret != GLOB_NOMATCH) {
                 globfree(&globbuf);
                 free(line);
-                fclose(fp);
+                int err = fclose(fp);
+                if (err)
+                    return CONFIG_ERR_IO;
+
                 return CONFIG_ERR_GLOB_FAILED;
             }
             for (size_t gi = 0; gi < globbuf.gl_pathc; gi++) {

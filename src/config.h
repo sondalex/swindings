@@ -24,6 +24,7 @@ typedef enum {
     CONFIG_ERR_ALLOC_FAILED,
     CONFIG_ERR_IO,
     CONFIG_ERR_GLOB_FAILED,
+    CONFIG_ERR_ENV_FAILED,
 } config_error_t;
 
 typedef struct {
