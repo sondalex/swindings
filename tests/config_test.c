@@ -13,7 +13,7 @@
 #define CHECKED_SNPRINTF(buf, fmt, ...)                                        \
     do {                                                                       \
         if (snprintf(buf, sizeof(buf), fmt, __VA_ARGS__) < 0)                  \
-            perror("snprintf failed");                                         \
+            TEST_FAIL_MESSAGE("snprintf failed");                              \
     } while (0)
 
 static char *make_tmpdir(void) {
@@ -58,10 +58,10 @@ static void write_file(const char *path, const char *content) {
     FILE *f = fopen(path, "w");
     if (!f)
         return;
-    if (fputs(content, f) != 0)
-        perror("write failed");
+    if (fputs(content, f) == EOF)
+        TEST_FAIL_MESSAGE("write failed");
     if (fclose(f) != 0)
-        perror("write failed");
+        TEST_FAIL_MESSAGE("write failed");
 }
 
 void test_sway_filepath_home_sway_dir(void) {

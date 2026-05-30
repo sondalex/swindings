@@ -13,7 +13,7 @@ void test_file_exists_for_existing_file(void) {
     close(fd);
     TEST_ASSERT_TRUE(file_exists(tmpl));
     if (remove(tmpl))
-        perror(tmpl);
+        TEST_FAIL_MESSAGE(tmpl);
 }
 
 void test_file_exists_for_missing_file(void) {

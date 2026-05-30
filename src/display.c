@@ -338,7 +338,7 @@ void display(const KeyMapList *kml, const theme_t *theme) {
 
     float content_height =
         (float)(PADDING + (int)kml->count * ROW_HEIGHT + PADDING);
-    Scroll scroll = scroll_create(content_height, WINDOW_HEIGHT);
+    Scroll scroll = scroll_create(content_height, BODY_SECTION_HEIGHT);
 
     Font top_font = load_best_font(&theme->top.font);
     Font body_font = load_best_font(&theme->body.font);
