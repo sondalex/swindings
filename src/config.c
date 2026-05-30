@@ -3,6 +3,8 @@
 #include "structures.h"
 #include "utils.h"
 #include <ctype.h>
+#include <glob.h>
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +23,8 @@ static void capitalize_into(const char *src, char *buf) {
     buf[0] = (char)toupper((unsigned char)buf[0]);
 }
 
-config_error_t config_read_file(const char *filepath, stringlist_t *out) {
+config_error_t config_read_file(const char *filepath, stringlist_t *out,
+                                bool follow_includes) {
     if (filepath == NULL || out == NULL) {
         return CONFIG_ERR_INVALID_ARGUMENT;
     }
@@ -42,6 +45,26 @@ config_error_t config_read_file(const char *filepath, stringlist_t *out) {
             pos++;
         if (*pos == '\0' || *pos == '#')
             continue;
+
+        if (follow_includes && strncmp(pos, "include ", 8) == 0) {
+            char *pattern = pos + 8;
+            while (*pattern == ' ' || *pattern == '\t')
+                pattern++;
+            glob_t globbuf;
+            int ret = glob(pattern, GLOB_TILDE | GLOB_NOCHECK, NULL, &globbuf);
+            if (ret != 0 && ret != GLOB_NOMATCH) {
+                globfree(&globbuf);
+                free(line);
+                fclose(fp);
+                return CONFIG_ERR_GLOB_FAILED;
+            }
+            for (size_t gi = 0; gi < globbuf.gl_pathc; gi++) {
+                /* Silently skip missing files from glob expansions */
+                config_read_file(globbuf.gl_pathv[gi], out, follow_includes);
+            }
+            globfree(&globbuf);
+            continue;
+        }
 
         if (strncmp(pos, PATTERN, sizeof(PATTERN) - 1) == 0 &&
             pos[sizeof(PATTERN) - 1] == ' ') {
@@ -87,7 +110,7 @@ char *config_get_sway_filepath(void) {
             return NULL;
         config_home = config_home_fallback;
     }
-    // NOTE: Copied (with modifications) from
+    // NOTE: Copied from
     // https://github.com/swaywm/sway/blob/f1b40bc288f3be3bcc6a3c71f28ca9bb2529e70b/sway/config.c
     struct config_path {
         const char *prefix;
@@ -99,9 +122,7 @@ char *config_get_sway_filepath(void) {
         {.prefix = config_home, .config_folder = "sway"},
         {.prefix = home, .config_folder = ".i3"},
         {.prefix = config_home, .config_folder = "i3"},
-        // NOTE: Different from original
         {.prefix = SYSCONFDIR, .config_folder = "sway"},
-        // NOTE: Different from original
         {.prefix = SYSCONFDIR, .config_folder = "i3"}};
 
     size_t num_config_paths = sizeof(config_paths) / sizeof(config_paths[0]);

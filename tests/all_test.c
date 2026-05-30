@@ -56,6 +56,10 @@ extern void test_sway_filepath_falls_back_to_i3(void);
 extern void test_sway_filepath_none_exist_returns_null(void);
 extern void test_sway_filepath_no_home_no_xdg_returns_null(void);
 extern void test_sway_filepath_xdg_config_home_i3(void);
+extern void test_include_ignored_when_follow_includes_false(void);
+extern void test_include_resolved_when_follow_includes_true(void);
+extern void test_include_glob_resolves_multiple_files(void);
+extern void test_include_missing_file_is_silently_skipped(void);
 
 int main(void) {
     UNITY_BEGIN();
@@ -91,6 +95,10 @@ int main(void) {
     RUN_TEST(test_sway_filepath_none_exist_returns_null);
     RUN_TEST(test_sway_filepath_no_home_no_xdg_returns_null);
     RUN_TEST(test_sway_filepath_xdg_config_home_i3);
+    RUN_TEST(test_include_ignored_when_follow_includes_false);
+    RUN_TEST(test_include_resolved_when_follow_includes_true);
+    RUN_TEST(test_include_glob_resolves_multiple_files);
+    RUN_TEST(test_include_missing_file_is_silently_skipped);
 
     return UNITY_END();
 }

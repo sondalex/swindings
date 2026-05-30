@@ -27,13 +27,19 @@ static struct cag_option options[] = {
      .access_name = "sway-config",
      .value_name = "FILE",
      .description = "Path to sway config. Defaults to None. When None, sway "
-                    "path resolution is followed."}};
+                    "path resolution is followed."},
+    {.identifier = 'i',
+     .access_letters = "i",
+     .access_name = "follow-includes",
+     .value_name = NULL,
+     .description = "Resolve 'include' directives in the sway config file."}};
 
 static void init_args(cli_args *args) {
     args->help = false;
     args->version = false;
     args->config = NULL;
     args->sway_config = NULL;
+    args->follow_includes = false;
 }
 
 bool parse_cli(int argc, char **argv, cli_args *args) {
@@ -59,6 +65,9 @@ bool parse_cli(int argc, char **argv, cli_args *args) {
             break;
         case 's':
             args->sway_config = (char *)cag_option_get_value(&context);
+            break;
+        case 'i':
+            args->follow_includes = true;
             break;
         case '?':
             cag_option_print_error(&context, stderr);

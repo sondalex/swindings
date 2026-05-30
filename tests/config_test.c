@@ -1,6 +1,7 @@
 #define _XOPEN_SOURCE 700
 #include "config.h"
 #include "ftw.h"
+#include "structures.h"
 #include "unity.h"
 #include <linux/limits.h>
 #include <stdio.h>
@@ -8,6 +9,12 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#define CHECKED_SNPRINTF(buf, fmt, ...)                                        \
+    do {                                                                       \
+        if (snprintf(buf, sizeof(buf), fmt, __VA_ARGS__) < 0)                  \
+            perror("snprintf failed");                                         \
+    } while (0)
 
 static char *make_tmpdir(void) {
     char tmpl[] = "/tmp/config_test_XXXXXX";
@@ -20,8 +27,7 @@ static char *make_tmpdir(void) {
 
 static void mkdir_p(const char *dir) {
     char buf[PATH_MAX];
-    if (snprintf(buf, sizeof(buf), "%s", dir) < 0)
-        return;
+    CHECKED_SNPRINTF(buf, "%s", dir);
     for (char *p = buf + 1; *p; p++) {
         if (*p == '/') {
             *p = '\0';
@@ -48,14 +54,22 @@ int remove_recursively(const char *path) {
     return nftw(path, remove_dir, 64, FTW_DEPTH | FTW_PHYS);
 }
 
+static void write_file(const char *path, const char *content) {
+    FILE *f = fopen(path, "w");
+    if (!f)
+        return;
+    if (fputs(content, f) != 0)
+        perror("write failed");
+    if (fclose(f) != 0)
+        perror("write failed");
+}
+
 void test_sway_filepath_home_sway_dir(void) {
     char *base = make_tmpdir();
 
     char dir[PATH_MAX], path[PATH_MAX];
-    if (snprintf(dir, sizeof(dir), "%s/.sway", base) < 0)
-        perror("snprintf failed");
-    if (snprintf(path, sizeof(path), "%s/config", dir) < 0)
-        perror("snprintf failed");
+    CHECKED_SNPRINTF(dir, "%s/.sway", base);
+    CHECKED_SNPRINTF(path, "%s/config", dir);
     mkdir_p(dir);
     touch(path);
 
@@ -75,10 +89,8 @@ void test_sway_filepath_xdg_config_home_sway(void) {
     char *base = make_tmpdir();
 
     char dir[PATH_MAX], path[PATH_MAX];
-    if (snprintf(dir, sizeof(dir), "%s/sway", base) < 0)
-        perror("snprintf failed");
-    if (snprintf(path, sizeof(path), "%s/config", dir) < 0)
-        perror("snprintf failed");
+    CHECKED_SNPRINTF(dir, "%s/sway", base);
+    CHECKED_SNPRINTF(path, "%s/config", dir);
     mkdir_p(dir);
     touch(path);
 
@@ -102,18 +114,14 @@ void test_sway_filepath_home_sway_beats_xdg(void) {
     char *xdg = make_tmpdir();
 
     char home_dir[PATH_MAX], home_path[PATH_MAX];
-    if (snprintf(home_dir, sizeof(home_dir), "%s/.sway", home) < 0)
-        perror("snprintf failed");
-    if (snprintf(home_path, sizeof(home_path), "%s/config", home_dir) < 0)
-        perror("snprintf failed");
+    CHECKED_SNPRINTF(home_dir, "%s/.sway", home);
+    CHECKED_SNPRINTF(home_path, "%s/config", home_dir);
     mkdir_p(home_dir);
     touch(home_path);
 
     char xdg_dir[PATH_MAX], xdg_path[PATH_MAX];
-    if (snprintf(xdg_dir, sizeof(xdg_dir), "%s/sway", xdg) < 0)
-        perror("snprintf failed");
-    if (snprintf(xdg_path, sizeof(xdg_path), "%s/config", xdg_dir) < 0)
-        perror("snprintf failed");
+    CHECKED_SNPRINTF(xdg_dir, "%s/sway", xdg);
+    CHECKED_SNPRINTF(xdg_path, "%s/config", xdg_dir);
     mkdir_p(xdg_dir);
     touch(xdg_path);
 
@@ -135,10 +143,8 @@ void test_sway_filepath_falls_back_to_i3(void) {
     char *home = make_tmpdir();
 
     char dir[PATH_MAX], path[PATH_MAX];
-    if (snprintf(dir, sizeof(dir), "%s/.i3", home) < 0)
-        perror("snprinf failed");
-    if (snprintf(path, sizeof(path), "%s/config", dir) < 0)
-        perror("snprintf failed");
+    CHECKED_SNPRINTF(dir, "%s/.i3", home);
+    CHECKED_SNPRINTF(path, "%s/config", dir);
     mkdir_p(dir);
     touch(path);
 
@@ -180,10 +186,8 @@ void test_sway_filepath_xdg_config_home_i3(void) {
     char *xdg = make_tmpdir();
 
     char dir[PATH_MAX], path[PATH_MAX];
-    if (snprintf(dir, sizeof(dir), "%s/i3", xdg) < 0)
-        perror("snprintf failed");
-    if (snprintf(path, sizeof(path), "%s/config", dir) < 0)
-        perror("snprintf failed");
+    CHECKED_SNPRINTF(dir, "%s/i3", xdg);
+    CHECKED_SNPRINTF(path, "%s/config", dir);
     mkdir_p(dir);
     touch(path);
 
@@ -199,4 +203,107 @@ void test_sway_filepath_xdg_config_home_i3(void) {
     remove_recursively(xdg);
     free(home);
     free(xdg);
+}
+
+void test_include_ignored_when_follow_includes_false(void) {
+    char *base = make_tmpdir();
+
+    char inc_path[PATH_MAX];
+    CHECKED_SNPRINTF(inc_path, "%s/extra.conf", base);
+    write_file(inc_path, "bindsym $mod+x exec xterm # Extra terminal\n");
+
+    char main_path[PATH_MAX];
+    CHECKED_SNPRINTF(main_path, "%s/config", base);
+    char main_content[PATH_MAX + 64];
+    CHECKED_SNPRINTF(main_content,
+                     "bindsym $mod+Return exec foot # Terminal\ninclude %s\n",
+                     inc_path);
+    write_file(main_path, main_content);
+
+    stringlist_t list;
+    stringlist_init(&list);
+    config_error_t err = config_read_file(main_path, &list, false);
+    TEST_ASSERT_EQUAL_INT(CONFIG_SUCCESS, err);
+    TEST_ASSERT_EQUAL_size_t(1, list.count);
+    TEST_ASSERT_TRUE(strncmp(list.items[0], "bindsym $mod+Return", 19) == 0);
+
+    stringlist_free(&list);
+    remove_recursively(base);
+    free(base);
+}
+
+void test_include_resolved_when_follow_includes_true(void) {
+    char *base = make_tmpdir();
+
+    char inc_path[PATH_MAX];
+    CHECKED_SNPRINTF(inc_path, "%s/extra.conf", base);
+    write_file(inc_path, "bindsym $mod+x exec xterm # Extra terminal\n");
+
+    char main_path[PATH_MAX];
+    CHECKED_SNPRINTF(main_path, "%s/config", base);
+    char main_content[PATH_MAX + 64];
+    CHECKED_SNPRINTF(main_content,
+                     "bindsym $mod+Return exec foot # Terminal\ninclude %s\n",
+                     inc_path);
+    write_file(main_path, main_content);
+
+    stringlist_t list;
+    stringlist_init(&list);
+    config_error_t err = config_read_file(main_path, &list, true);
+    TEST_ASSERT_EQUAL_INT(CONFIG_SUCCESS, err);
+    TEST_ASSERT_EQUAL_size_t(2, list.count);
+
+    stringlist_free(&list);
+    remove_recursively(base);
+    free(base);
+}
+
+void test_include_glob_resolves_multiple_files(void) {
+    char *base = make_tmpdir();
+
+    char conf_dir[PATH_MAX];
+    CHECKED_SNPRINTF(conf_dir, "%s/conf.d", base);
+    mkdir_p(conf_dir);
+
+    char f1[PATH_MAX], f2[PATH_MAX];
+    CHECKED_SNPRINTF(f1, "%s/01.conf", conf_dir);
+    CHECKED_SNPRINTF(f2, "%s/02.conf", conf_dir);
+    write_file(f1, "bindsym $mod+1 workspace 1 # WS 1\n");
+    write_file(f2, "bindsym $mod+2 workspace 2 # WS 2\n");
+
+    char main_path[PATH_MAX];
+    CHECKED_SNPRINTF(main_path, "%s/config", base);
+    char main_content[PATH_MAX + 64];
+    CHECKED_SNPRINTF(main_content, "include %s/*.conf\n", conf_dir);
+    write_file(main_path, main_content);
+
+    stringlist_t list;
+    stringlist_init(&list);
+    config_error_t err = config_read_file(main_path, &list, true);
+    TEST_ASSERT_EQUAL_INT(CONFIG_SUCCESS, err);
+    TEST_ASSERT_EQUAL_size_t(2, list.count);
+
+    stringlist_free(&list);
+    remove_recursively(base);
+    free(base);
+}
+
+void test_include_missing_file_is_silently_skipped(void) {
+    char *base = make_tmpdir();
+
+    char main_path[PATH_MAX];
+    CHECKED_SNPRINTF(main_path, "%s/config", base);
+    write_file(main_path,
+               "bindsym $mod+Return exec foot # Terminal\n"
+               "include /nonexistent/path/that/does/not/exist.conf\n");
+
+    stringlist_t list;
+    stringlist_init(&list);
+    config_error_t err = config_read_file(main_path, &list, true);
+    TEST_ASSERT_EQUAL_INT(CONFIG_SUCCESS, err);
+    TEST_ASSERT_EQUAL_size_t(1, list.count);
+
+    stringlist_free(&list);
+    remove_recursively(base);
+    free(base);
 }
