@@ -26,6 +26,20 @@ Run:
 swindings
 ```
 
+### Options
+
+
+| Flag | Description |
+|------|-------------|
+| `-i`, `--follow-includes` | Resolve `include` directives in the sway config file. Glob patterns are supported (e.g. `include conf.d/*.conf`). Disabled by default. |
+
+
+**Example** — read keybindings from a config that uses `include`:
+
+```bash
+swindings --follow-includes
+```
+
 
 ## Theming
 
