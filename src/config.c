@@ -1,6 +1,7 @@
 #include "config.h"
 #include "asprintf.h"
 #include "structures.h"
+#include "utils.h"
 #include <ctype.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -61,15 +62,63 @@ config_error_t config_read_file(const char *filepath, stringlist_t *out) {
     return CONFIG_SUCCESS;
 }
 
-char *config_get_sway_filepath(void) {
-    const char *home = getenv("HOME");
-    if (!home)
+// NOTE: Copied (with modifications) from
+// https://github.com/swaywm/sway/blob/f1b40bc288f3be3bcc6a3c71f28ca9bb2529e70b/sway/config.c
+static char *config_path(const char *prefix, const char *config_folder) {
+    if (!prefix || !prefix[0] || !config_folder || !config_folder[0]) {
         return NULL;
-
+    }
     char *path = NULL;
-    if (asprintf(&path, "%s/.config/sway/config", home) == -1)
+    // NOTE: Different here.
+    if (asprintf(&path, "%s/%s/config", prefix, config_folder) < 0)
         return NULL;
+    return path;
+}
 
+char *config_get_sway_filepath(void) {
+    char *path = NULL;
+    const char *home = getenv("HOME");
+    const char *config_home = getenv("XDG_CONFIG_HOME");
+    char *config_home_fallback = NULL;
+    if (config_home == NULL || config_home[0] == '\0') {
+        if (!home)
+            return NULL;
+        if (asprintf(&config_home_fallback, "%s/.config/", home) == -1)
+            return NULL;
+        config_home = config_home_fallback;
+    }
+    // NOTE: Copied (with modifications) from
+    // https://github.com/swaywm/sway/blob/f1b40bc288f3be3bcc6a3c71f28ca9bb2529e70b/sway/config.c
+    struct config_path {
+        const char *prefix;
+        const char *config_folder;
+    };
+
+    struct config_path config_paths[] = {
+        {.prefix = home, .config_folder = ".sway"},
+        {.prefix = config_home, .config_folder = "sway"},
+        {.prefix = home, .config_folder = ".i3"},
+        {.prefix = config_home, .config_folder = "i3"},
+        // NOTE: Different from original
+        {.prefix = SYSCONFDIR, .config_folder = "sway"},
+        // NOTE: Different from original
+        {.prefix = SYSCONFDIR, .config_folder = "i3"}};
+
+    size_t num_config_paths = sizeof(config_paths) / sizeof(config_paths[0]);
+    for (size_t i = 0; i < num_config_paths; i++) {
+        path =
+            config_path(config_paths[i].prefix, config_paths[i].config_folder);
+        if (!path) {
+            continue;
+        }
+        if (file_exists(path)) {
+            break;
+        }
+        free(path);
+        path = NULL;
+    }
+
+    free(config_home_fallback);
     return path;
 }
 

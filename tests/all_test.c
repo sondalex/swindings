@@ -1,7 +1,29 @@
 #include "unity.h"
+#include <stdlib.h>
+#include <string.h>
 
-void setUp(void) {}
-void tearDown(void) {}
+static char *saved_home;
+static char *saved_xdg;
+
+void setUp(void) {
+    char *h = getenv("HOME");
+    saved_home = h ? strdup(h) : NULL;
+    char *x = getenv("XDG_CONFIG_HOME");
+    saved_xdg = x ? strdup(x) : NULL;
+}
+
+void tearDown(void) {
+    if (saved_home) {
+        setenv("HOME", saved_home, 1);
+        free(saved_home);
+    } else
+        unsetenv("HOME");
+    if (saved_xdg) {
+        setenv("XDG_CONFIG_HOME", saved_xdg, 1);
+        free(saved_xdg);
+    } else
+        unsetenv("XDG_CONFIG_HOME");
+}
 
 extern void test_in_intlist(void);
 extern void test_get_segments(void);
@@ -24,6 +46,16 @@ extern void test_global_overrides_section_if_not_set(void);
 extern void test_section_overrides_global(void);
 extern void test_global_alpha_propagates_to_sections(void);
 extern void test_section_alpha_propagates_to_body(void);
+
+extern void test_file_exists_for_existing_file(void);
+extern void test_file_exists_for_missing_file(void);
+extern void test_sway_filepath_home_sway_dir(void);
+extern void test_sway_filepath_xdg_config_home_sway(void);
+extern void test_sway_filepath_home_sway_beats_xdg(void);
+extern void test_sway_filepath_falls_back_to_i3(void);
+extern void test_sway_filepath_none_exist_returns_null(void);
+extern void test_sway_filepath_no_home_no_xdg_returns_null(void);
+extern void test_sway_filepath_xdg_config_home_i3(void);
 
 int main(void) {
     UNITY_BEGIN();
@@ -49,6 +81,16 @@ int main(void) {
     RUN_TEST(test_section_overrides_global);
     RUN_TEST(test_global_alpha_propagates_to_sections);
     RUN_TEST(test_section_alpha_propagates_to_body);
+
+    RUN_TEST(test_file_exists_for_existing_file);
+    RUN_TEST(test_file_exists_for_missing_file);
+    RUN_TEST(test_sway_filepath_home_sway_dir);
+    RUN_TEST(test_sway_filepath_xdg_config_home_sway);
+    RUN_TEST(test_sway_filepath_home_sway_beats_xdg);
+    RUN_TEST(test_sway_filepath_falls_back_to_i3);
+    RUN_TEST(test_sway_filepath_none_exist_returns_null);
+    RUN_TEST(test_sway_filepath_no_home_no_xdg_returns_null);
+    RUN_TEST(test_sway_filepath_xdg_config_home_i3);
 
     return UNITY_END();
 }

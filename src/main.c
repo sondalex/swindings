@@ -40,8 +40,12 @@ int main(int argc, char *argv[]) {
 
         return ThemeError;
     }
-
-    char *filepath = config_get_sway_filepath();
+    char *filepath;
+    if (args.sway_config) {
+        filepath = args.sway_config;
+    } else {
+        filepath = config_get_sway_filepath();
+    }
     if (!filepath) {
         if (fprintf(stderr, "failed to determine sway config path\n"))
             return IOError;

@@ -1,5 +1,11 @@
+
 #ifndef CONFIG_H
 #define CONFIG_H
+
+#ifndef SYSCONFDIR
+#define SYSCONFDIR "/usr/local/etc"
+#endif
+
 
 #include <stddef.h>
 #include "structures.h"
