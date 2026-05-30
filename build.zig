@@ -26,6 +26,7 @@ const c_flags = [_][]const u8{
 };
 
 const src_files = [_][]const u8{
+    "src/utils.c",
     "src/main.c",
     "src/search.c",
     "src/config.c",
@@ -203,6 +204,15 @@ pub fn build(b: *std.Build) !void {
     const include_paths = try getIncludePaths(b);
     exe.root_module.addCMacro("GIT_VERSION", b.fmt("\"{s}\"", .{version}));
     if (valgrind) exe.root_module.addCMacro("WITH_VALGRIND", "1");
+
+    const prefix = b.install_prefix;
+    const sysconfdir = if (std.mem.eql(u8, prefix, "/usr"))
+        "/etc"
+    else
+        b.fmt("{s}/etc", .{prefix});
+
+    exe.root_module.addCMacro("SYSCONFDIR", b.fmt("\"{s}\"", .{sysconfdir}));
+
     addSystemLibraryPaths(exe.root_module, io);
     addCIncludePaths(exe.root_module, include_paths);
 
@@ -247,8 +257,13 @@ pub fn build(b: *std.Build) !void {
         "tests/all_test.c",
         "tests/structures_test.c",
         "tests/theme_test.c",
+        "tests/config_test.c",
+        "tests/utils_test.c",
         "src/structures.c",
         "src/theme.c",
+        "src/utils.c",
+        "src/config.c",
+        "src/cli.c",
     }, test_flags);
     addCSourceFiles(unit_test.root_module, &[_][]const u8{
         "subprojects/unity/src/unity.c",

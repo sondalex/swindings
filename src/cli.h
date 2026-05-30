@@ -11,6 +11,7 @@ typedef struct {
     bool help;
     bool version;
     char *config;
+    char *sway_config;
 } cli_args;
 
 /**

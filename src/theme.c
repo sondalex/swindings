@@ -1,18 +1,16 @@
 #include "theme.h"
 #include "asprintf.h"
 #include "tomlc17.h"
+#include "utils.h"
 #include <errno.h>
 #include <libgen.h>
-#include <limits.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 static theme_error_t create_file(const char *filepath, bool create_dir);
-static bool file_exists(const char *filepath);
 static void color_init_with_defaults(theme_color_t *color);
 static theme_color_t color_new_with_defaults(void);
 static void font_init_with_defaults(theme_font_t *font);
@@ -32,10 +30,6 @@ static theme_error_t theme_toml_parse_body(const toml_result_t *toml,
 static theme_error_t theme_toml_parse_bottom(const toml_result_t *toml,
                                              theme_layer_t *layer);
 static void theme_layer_merge(theme_layer_t *dest, const theme_layer_t *src);
-
-static bool file_exists(const char *filepath) {
-    return (bool)(access(filepath, F_OK) == 0);
-}
 
 void parse_hex_color(const char *hex_str, theme_color_t *c) {
     if (hex_str == NULL || c == NULL)
@@ -167,25 +161,6 @@ static void font_init_with_defaults(theme_font_t *font) {
     font->has_color = false;
     font->color = (theme_color_t){
         .r = 130, .g = 130, .b = 130, .a = 255, .has_alpha = true};
-}
-
-static char *get_app_prefix(void) {
-    char exe_buf[PATH_MAX + 1];
-    ssize_t len = readlink("/proc/self/exe", exe_buf, PATH_MAX);
-    if (len == -1)
-        return NULL;
-
-    exe_buf[len] = '\0';
-
-    char *last_slash = strrchr(exe_buf, '/');
-    if (last_slash)
-        *last_slash = '\0';
-
-    last_slash = strrchr(exe_buf, '/');
-    if (last_slash)
-        *last_slash = '\0';
-
-    return strdup(exe_buf);
 }
 
 static char *resolve_default_font_path(void) {

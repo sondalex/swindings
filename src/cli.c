@@ -22,12 +22,18 @@ static struct cag_option options[] = {
      .access_name = "config",
      .value_name = "FILE",
      .description = "Path to a theme configuration file (TOML)"},
-};
+    {.identifier = 's',
+     .access_letters = "s",
+     .access_name = "sway-config",
+     .value_name = "FILE",
+     .description = "Path to sway config. Defaults to None. When None, sway "
+                    "path resolution is followed."}};
 
 static void init_args(cli_args *args) {
     args->help = false;
     args->version = false;
     args->config = NULL;
+    args->sway_config = NULL;
 }
 
 bool parse_cli(int argc, char **argv, cli_args *args) {
@@ -50,6 +56,9 @@ bool parse_cli(int argc, char **argv, cli_args *args) {
             return false;
         case 'c':
             args->config = (char *)cag_option_get_value(&context);
+            break;
+        case 's':
+            args->sway_config = (char *)cag_option_get_value(&context);
             break;
         case '?':
             cag_option_print_error(&context, stderr);
