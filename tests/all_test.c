@@ -61,6 +61,7 @@ extern void test_include_resolved_when_follow_includes_true(void);
 extern void test_include_glob_resolves_multiple_files(void);
 extern void test_include_missing_file_is_silently_skipped(void);
 extern void test_remove_flags(void);
+extern void test_normalize_space(void);
 
 int main(void) {
     UNITY_BEGIN();
@@ -101,6 +102,7 @@ int main(void) {
     RUN_TEST(test_include_resolved_when_follow_includes_true);
     RUN_TEST(test_include_glob_resolves_multiple_files);
     RUN_TEST(test_include_missing_file_is_silently_skipped);
+    RUN_TEST(test_normalize_space);
 
     return UNITY_END();
 }

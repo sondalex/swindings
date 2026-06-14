@@ -65,6 +65,8 @@ config_error_t config_read_file(const char *filepath, stringlist_t *out, bool fo
 // Caller must free() the returned string.
 char *config_get_sway_filepath(void);
 
+
+void normalize_space(char *string);
 void remove_flags(char *string);
 
 #endif

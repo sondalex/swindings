@@ -2,6 +2,7 @@
 #include "asprintf.h"
 #include "structures.h"
 #include "utils.h"
+#include <assert.h>
 #include <ctype.h>
 #include <glob.h>
 #include <stdbool.h>
@@ -279,6 +280,38 @@ void remove_flags(char *string) {
     *write = '\0';
 }
 
+void normalize_space(char *string) {
+    if (string == NULL)
+        return;
+
+    char *read = string;
+    char *write = string;
+
+    while (*read == ' ')
+        read++;
+
+    int in_space = 0;
+
+    while (*read != '\0') {
+        if (*read == ' ') {
+            if (!in_space) {
+                *write++ = ' ';
+                in_space = 1;
+            }
+        } else {
+            *write++ = *read;
+            in_space = 0;
+        }
+
+        read++;
+    }
+
+    if (write > string && *(write - 1) == ' ')
+        write--;
+
+    *write = '\0';
+}
+
 config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
     for (size_t i = 0; i < lines->count; i++) {
         char *key_combo = NULL;
@@ -287,20 +320,22 @@ config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
         char **tokens = NULL;
         size_t token_count = 0;
 
-        char *pos = lines->items[i];
-        if (strncmp(pos, "bindsym ", 8) != 0)
+        char *cmd = strndup(lines->items[i], (size_t)(lines->items[i]));
+        if (strncmp(cmd, "bindsym ", 8) != 0)
             continue;
-        pos += 8;
-
-        char *space = strchr(pos, ' ');
+        cmd += 8;
+        normalize_space(cmd);
+        remove_flags(cmd);
+        char *space = strchr(cmd, ' ');
         if (!space)
             continue;
 
-        key_combo = strndup(pos, (size_t)(space - pos));
+        size_t n = (size_t)(space - cmd);
+        key_combo = strndup(cmd, n);
         if (!key_combo)
             goto fail;
         if (key_combo) {
-            remove_flags(key_combo);
+            assert(strlen(key_combo));
         }
 
         size_t len = strlen(space + 1); // Length after the space
