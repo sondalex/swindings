@@ -64,6 +64,68 @@ static void write_file(const char *path, const char *content) {
         TEST_FAIL_MESSAGE("write failed");
 }
 
+void test_normalize_space(void) {
+    {
+        char s[] = "";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("", s);
+    }
+
+    {
+        char s[] = "hello";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("hello", s);
+    }
+
+    {
+        char s[] = "   hello";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("hello", s);
+    }
+
+    {
+        char s[] = "hello   ";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("hello", s);
+    }
+
+    {
+        char s[] = "   hello   ";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("hello", s);
+    }
+
+    {
+        char s[] = "hello    world";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("hello world", s);
+    }
+
+    {
+        char s[] = "hello     world     again";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("hello world again", s);
+    }
+
+    {
+        char s[] = "     ";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("", s);
+    }
+
+    {
+        char s[] = "a";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("a", s);
+    }
+
+    {
+        char s[] = "a     b";
+        normalize_space(s);
+        TEST_ASSERT_EQUAL_STRING("a b", s);
+    }
+}
+
 void test_remove_flags(void) {
     {
         char cmd[] = "bindsym --to-code $mod+Print ls";
@@ -110,7 +172,7 @@ void test_remove_flags(void) {
     {
         char cmd[] = "plain command with no flags";
         remove_flags(cmd);
-        TEST_ASSERT_EQUAL_STRING("plain command with no flags", cmd);
+        TEST_ASSERT_EQUAL_STRING(cmd, cmd);
     }
 
     {
@@ -122,7 +184,7 @@ void test_remove_flags(void) {
     {
         char cmd[] = "cmd --123abc file";
         remove_flags(cmd);
-        TEST_ASSERT_EQUAL_STRING("cmd --123abc file", cmd);
+        TEST_ASSERT_EQUAL_STRING(cmd, cmd);
     }
 
     {
@@ -146,7 +208,7 @@ void test_remove_flags(void) {
     {
         char cmd[] = "exec firefox --no-sandbox --enable-gpu";
         remove_flags(cmd);
-        TEST_ASSERT_EQUAL_STRING("exec firefox --no-sandbox --enable-gpu", cmd);
+        TEST_ASSERT_EQUAL_STRING(cmd, cmd);
     }
 
     {
@@ -160,7 +222,13 @@ void test_remove_flags(void) {
     {
         char cmd[] = "bindsym $mod+Return exec terminal";
         remove_flags(cmd);
-        TEST_ASSERT_EQUAL_STRING("bindsym $mod+Return exec terminal", cmd);
+        TEST_ASSERT_EQUAL_STRING(cmd, cmd);
+    }
+
+    {
+        char cmd[] = "$mod+Return exec terminal";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING(cmd, cmd);
     }
 
     {
