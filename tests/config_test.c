@@ -136,6 +136,38 @@ void test_remove_flags(void) {
         remove_flags(cmd);
         TEST_ASSERT_EQUAL_STRING("cmd arg", cmd);
     }
+
+    {
+        char cmd[] = "cmd --empty= arg exec ls --color *.txt";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("cmd arg exec ls --color *.txt", cmd);
+    }
+
+    {
+        char cmd[] = "exec firefox --no-sandbox --enable-gpu";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("exec firefox --no-sandbox --enable-gpu", cmd);
+    }
+
+    {
+        char cmd[] = "--global --debug bindsym Mod4+Return exec "
+                     "i3-sensible-terminal -e vim";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING(
+            "bindsym Mod4+Return exec i3-sensible-terminal -e vim", cmd);
+    }
+
+    {
+        char cmd[] = "bindsym $mod+Return exec terminal";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("bindsym $mod+Return exec terminal", cmd);
+    }
+
+    {
+        char cmd[] = "exec --help --version";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("exec --help --version", cmd);
+    }
 }
 
 void test_sway_filepath_home_sway_dir(void) {

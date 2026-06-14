@@ -241,6 +241,15 @@ void remove_flags(char *string) {
     char *write = string;
 
     while (*read != '\0') {
+        if (strncmp(read, "exec", 4) == 0 &&
+            (read[4] == ' ' || read[4] == '\0' || read[4] == '\t')) {
+            while (*read != '\0') {
+                *write++ = *read++;
+            }
+            *write = '\0';
+            return;
+        }
+
         if (strncmp(read, "--", 2) == 0 && isalpha((char)read[2])) {
             read += 2;
 
