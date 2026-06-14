@@ -64,6 +64,80 @@ static void write_file(const char *path, const char *content) {
         TEST_FAIL_MESSAGE("write failed");
 }
 
+void test_remove_flags(void) {
+    {
+        char cmd[] = "bindsym --to-code $mod+Print ls";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("bindsym $mod+Print ls", cmd);
+    }
+
+    {
+        char cmd[] = "run --verbose --output=file.txt --debug=1 arg1 arg2";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("run arg1 arg2", cmd);
+    }
+
+    {
+        char cmd[] = "--help --verbose ls file.txt";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("ls file.txt", cmd);
+    }
+
+    {
+        char cmd[] = "ls --color=auto";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("ls ", cmd);
+    }
+
+    {
+        char cmd[] = "cmd --flag=value extra";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("cmd extra", cmd);
+    }
+
+    {
+        char cmd[] = "cmd --flag extra";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("cmd extra", cmd);
+    }
+
+    {
+        char cmd[] = "--help --verbose";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("", cmd);
+    }
+
+    {
+        char cmd[] = "plain command with no flags";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("plain command with no flags", cmd);
+    }
+
+    {
+        char cmd[] = "";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("", cmd);
+    }
+
+    {
+        char cmd[] = "cmd --123abc file";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("cmd --123abc file", cmd);
+    }
+
+    {
+        char cmd[] = "cmd --one --two=val --three arg";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("cmd arg", cmd);
+    }
+
+    {
+        char cmd[] = "cmd --empty= arg";
+        remove_flags(cmd);
+        TEST_ASSERT_EQUAL_STRING("cmd arg", cmd);
+    }
+}
+
 void test_sway_filepath_home_sway_dir(void) {
     char *base = make_tmpdir();
 

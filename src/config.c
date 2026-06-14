@@ -191,6 +191,84 @@ void keymaplist_free(KeyMapList *list) {
     free(list->items);
     keymaplist_init(list);
 }
+/**
+ * Removes all flags and their values from a command string in-place.
+ *
+ * A flag is defined as a token starting with "--" followed immediately by
+ * at least one alphabetic character. Two forms are supported:
+ *   - Boolean flag:         --flag
+ *   - Value flag (with =):  --flag=value
+ *
+ * The entire flag (including the value if the `=` form is used) is removed,
+ * along with the single trailing space that follows it (if present).
+ * The string is compacted in-place and properly null-terminated.
+ *
+ * @param string  The command string to modify. Must be a null-terminated,
+ *                writable (mutable) buffer. Passing a string literal will
+ *                cause a segmentation fault. If NULL, the function returns
+ *                immediately without doing anything.
+ *
+ * @note
+ * - Space-separated value flags of the form "--flag value" are **NOT**
+ * supported.
+ * - Flags must be separated by spaces from surrounding tokens.
+ * - The function is safe against multiple consecutive flags and flags at the
+ *   beginning or end of the string.
+ * - The string buffer must be large enough to hold the original content
+ *   (no extra space is allocated; the string only shrinks).
+ *
+ * @return void
+ *
+ * @example
+ *   char cmd[] = "run --output=file.txt --verbose --debug=1 arg1 arg2";
+ *   remove_flags(cmd);
+ *   // cmd becomes: "run arg1 arg2"
+ *
+ *   char cmd2[] = "--help";
+ *   remove_flags(cmd2);
+ *   // cmd2 becomes: "" (empty string)
+ *
+ *   char cmd3[] = "ls --color=auto file.txt";
+ *   remove_flags(cmd3);
+ *   // cmd3 becomes: "ls file.txt"
+ */
+void remove_flags(char *string) {
+    if (string == NULL) {
+        return;
+    }
+
+    char *read = string;
+    char *write = string;
+
+    while (*read != '\0') {
+        if (strncmp(read, "--", 2) == 0 && isalpha((char)read[2])) {
+            read += 2;
+
+            while (*read != '\0') {
+                if (*read == '=') {
+                    read++;
+                    while (*read != ' ' && *read != '\0') {
+                        read++;
+                    }
+                    break;
+                }
+                if (*read == ' ' || *read == '\0') {
+                    break;
+                }
+                read++;
+            }
+
+            if (*read == ' ') {
+                read++;
+            }
+            continue;
+        }
+
+        *write++ = *read++;
+    }
+
+    *write = '\0';
+}
 
 config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
     for (size_t i = 0; i < lines->count; i++) {
@@ -212,6 +290,9 @@ config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
         key_combo = strndup(pos, (size_t)(space - pos));
         if (!key_combo)
             goto fail;
+        if (key_combo) {
+            remove_flags(key_combo);
+        }
 
         size_t len = strlen(space + 1); // Length after the space
         desc = malloc(len + 1);
