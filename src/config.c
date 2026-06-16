@@ -312,40 +312,42 @@ void normalize_space(char *string) {
     *write = '\0';
 }
 
+// There's a memory leak here.
 config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
     for (size_t i = 0; i < lines->count; i++) {
+        char *cmd = NULL;
         char *key_combo = NULL;
         char *desc = NULL;
         char *tmp = NULL;
         char **tokens = NULL;
         size_t token_count = 0;
 
-        char *cmd = strndup(lines->items[i], (size_t)(lines->items[i]));
-        if (strncmp(cmd, "bindsym ", 8) != 0)
-            continue;
-        cmd += 8;
-        normalize_space(cmd);
-        remove_flags(cmd);
-        char *space = strchr(cmd, ' ');
-        if (!space)
-            continue;
+        cmd = strdup(lines->items[i]);
+        if (!cmd)
+            goto fail;
 
-        size_t n = (size_t)(space - cmd);
-        key_combo = strndup(cmd, n);
+        char *pos = cmd;
+        if (strncmp(pos, "bindsym ", 8) != 0)
+            goto cleanup;
+
+        pos += 8;
+        normalize_space(pos);
+        remove_flags(pos);
+
+        char *space = strchr(pos, ' ');
+        if (!space)
+            goto cleanup;
+
+        key_combo = strndup(pos, (size_t)(space - pos));
         if (!key_combo)
             goto fail;
-        if (key_combo) {
-            assert(strlen(key_combo));
-        }
 
-        size_t len = strlen(space + 1); // Length after the space
+        size_t len = strlen(space + 1);
         desc = malloc(len + 1);
-        if (!desc) {
-            goto fail;
-        }
-        capitalize_into(space + 1, desc);
         if (!desc)
             goto fail;
+
+        capitalize_into(space + 1, desc);
 
         tmp = strdup(key_combo);
         if (!tmp)
@@ -353,28 +355,30 @@ config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
 
         char *tok = strtok(tmp, "+");
         while (tok) {
-            char **new_tokens = (char **)(realloc(
-                (char *)tokens, (token_count + 1) * sizeof(char *)));
+            char **new_tokens = (char **)realloc(
+                (char *)tokens, (token_count + 1) * sizeof(char *));
             if (!new_tokens)
                 goto fail;
+
             tokens = new_tokens;
 
             tokens[token_count] = strdup(tok);
             if (!tokens[token_count])
                 goto fail;
-            token_count++;
 
+            token_count++;
             tok = strtok(NULL, "+");
         }
+
         free(tmp);
         tmp = NULL;
         free(key_combo);
         key_combo = NULL;
+        free(cmd);
+        cmd = NULL;
 
         if (token_count == 0) {
-            free(desc);
-            free((char *)tokens);
-            return CONFIG_ERR_ALLOC_FAILED; // or continue;
+            goto cleanup;
         }
 
         KeyMap km = {0};
@@ -387,16 +391,34 @@ config_error_t parse_key_maps(stringlist_t *lines, KeyMapList *out) {
             keymap_free(&km);
             return CONFIG_ERR_ALLOC_FAILED;
         }
+
+        desc = NULL;
+        tokens = NULL;
+
+    cleanup:
+        free(cmd);
+        free(key_combo);
+        free(tmp);
+        free(desc);
+        if (tokens) {
+            for (size_t j = 0; j < token_count; j++)
+                free(tokens[j]);
+            free((char *)tokens);
+        }
         continue;
 
     fail:
-        for (size_t j = 0; j < token_count; j++)
-            free(tokens[j]);
-        free((char *)tokens);
-        free(tmp);
+        free(cmd);
         free(key_combo);
+        free(tmp);
         free(desc);
+        if (tokens) {
+            for (size_t j = 0; j < token_count; j++)
+                free(tokens[j]);
+            free((char *)tokens);
+        }
         return CONFIG_ERR_ALLOC_FAILED;
     }
+
     return CONFIG_SUCCESS;
 }

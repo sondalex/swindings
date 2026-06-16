@@ -481,3 +481,92 @@ void test_include_missing_file_is_silently_skipped(void) {
     remove_recursively(base);
     free(base);
 }
+
+void test_parse_key_maps(void) {
+    {
+        KeyMapList kml;
+        keymaplist_init(&kml);
+        stringlist_t list;
+        stringlist_init(&list);
+
+        stringlist_append(&list, "bindsym $mod+Return exec $term");
+        stringlist_append(&list,
+                          "bindsym $mod+m --border exec \"notify-send Hello\"");
+
+        config_error_t err = parse_key_maps(&list, &kml);
+
+        TEST_ASSERT_EQUAL_INT(CONFIG_SUCCESS, err);
+        TEST_ASSERT_EQUAL_INT(2, kml.count);
+
+        TEST_ASSERT_EQUAL_STRING("Return", kml.items[0].main_key);
+        TEST_ASSERT_EQUAL_INT(1, kml.items[0].modifier_count);
+        TEST_ASSERT_EQUAL_STRING("$mod", kml.items[0].modifiers[0]);
+        TEST_ASSERT_EQUAL_STRING("Exec $term", kml.items[0].description);
+
+        TEST_ASSERT_EQUAL_STRING("m", kml.items[1].main_key);
+        TEST_ASSERT_EQUAL_INT(1, kml.items[1].modifier_count);
+        TEST_ASSERT_EQUAL_STRING("$mod", kml.items[1].modifiers[0]);
+        TEST_ASSERT_EQUAL_STRING("Exec \"notify-send Hello\"",
+                                 kml.items[1].description);
+
+        stringlist_free(&list);
+        keymaplist_free(&kml);
+    }
+
+    {
+        KeyMapList kml;
+        keymaplist_init(&kml);
+        stringlist_t list;
+        stringlist_init(&list);
+
+        stringlist_append(&list, "# this is a comment");
+        stringlist_append(&list, "set $mod Mod4");
+        stringlist_append(&list, "bindsym $mod+q kill");
+
+        config_error_t err = parse_key_maps(&list, &kml);
+
+        TEST_ASSERT_EQUAL_INT(CONFIG_SUCCESS, err);
+        TEST_ASSERT_EQUAL_INT(1, kml.count);
+        TEST_ASSERT_EQUAL_STRING("q", kml.items[0].main_key);
+
+        stringlist_free(&list);
+        keymaplist_free(&kml);
+    }
+
+    {
+        KeyMapList kml;
+        keymaplist_init(&kml);
+        stringlist_t list;
+        stringlist_init(&list);
+
+        stringlist_append(&list, "bindsym $mod+Shift+q kill");
+
+        config_error_t err = parse_key_maps(&list, &kml);
+
+        TEST_ASSERT_EQUAL_INT(CONFIG_SUCCESS, err);
+        TEST_ASSERT_EQUAL_INT(1, kml.count);
+        TEST_ASSERT_EQUAL_STRING("q", kml.items[0].main_key);
+        TEST_ASSERT_EQUAL_INT(2, kml.items[0].modifier_count);
+        TEST_ASSERT_EQUAL_STRING("$mod", kml.items[0].modifiers[0]);
+        TEST_ASSERT_EQUAL_STRING("Shift", kml.items[0].modifiers[1]);
+        TEST_ASSERT_EQUAL_STRING("Kill", kml.items[0].description);
+
+        stringlist_free(&list);
+        keymaplist_free(&kml);
+    }
+
+    {
+        KeyMapList kml;
+        keymaplist_init(&kml);
+        stringlist_t list;
+        stringlist_init(&list);
+
+        config_error_t err = parse_key_maps(&list, &kml);
+
+        TEST_ASSERT_EQUAL_INT(CONFIG_SUCCESS, err);
+        TEST_ASSERT_EQUAL_INT(0, kml.count);
+
+        stringlist_free(&list);
+        keymaplist_free(&kml);
+    }
+}

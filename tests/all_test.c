@@ -62,6 +62,7 @@ extern void test_include_glob_resolves_multiple_files(void);
 extern void test_include_missing_file_is_silently_skipped(void);
 extern void test_remove_flags(void);
 extern void test_normalize_space(void);
+extern void test_parse_key_maps(void);
 
 int main(void) {
     UNITY_BEGIN();
@@ -103,6 +104,7 @@ int main(void) {
     RUN_TEST(test_include_glob_resolves_multiple_files);
     RUN_TEST(test_include_missing_file_is_silently_skipped);
     RUN_TEST(test_normalize_space);
+    RUN_TEST(test_parse_key_maps);
 
     return UNITY_END();
 }
