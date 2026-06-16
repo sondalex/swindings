@@ -56,9 +56,17 @@ config_error_t config_read_file(const char *filepath, stringlist_t *out,
             if (pattern[0] == '~') {
                 const char *home = getenv("HOME");
                 if (!home) {
+                    free(line);
+                    int err = fclose(fp);
+                    if (err)
+                        return CONFIG_ERR_IO;
                     return CONFIG_ERR_ENV_FAILED;
                 }
                 if (asprintf(&expanded, "%s%s", home, pattern + 1) < 0) {
+                    int err = fclose(fp);
+                    if (err)
+                        return CONFIG_ERR_IO;
+
                     return CONFIG_ERR_ALLOC_FAILED;
                 }
                 pattern = expanded;

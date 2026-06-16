@@ -35,8 +35,11 @@ int main(int argc, char *argv[]) {
         err = theme_load_from_config(&theme);
     }
     if (err != THEME_SUCCESS) {
-        if (fprintf(stderr, "Failed to set THEME: %s\n", theme_error_str(err)))
+        if (fprintf(stderr, "Failed to set THEME: %s\n",
+                    theme_error_str(err))) {
+            theme_free(&theme);
             return IOError;
+        }
 
         return ThemeError;
     }

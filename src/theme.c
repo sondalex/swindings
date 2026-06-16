@@ -258,7 +258,10 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
 
     // Parse font file
     if (font_file.type == TOML_STRING) {
-        free(font.file);
+        if (font.file) {
+            free(font.file);
+            font.file = NULL;
+        }
         if (strlen(font_file.u.str.ptr) > 0) {
             font.file = strdup(font_file.u.str.ptr);
             if (!font.file)
@@ -277,6 +280,7 @@ theme_toml_parse(const toml_result_t *toml, theme_layer_t *layer,
     } else if (font_color.type != TOML_UNKNOWN) {
         if (font.file != NULL) {
             free(font.file);
+            font.file = NULL;
         }
         return THEME_PARSING_ERROR;
     }
@@ -435,13 +439,6 @@ theme_result_t theme_load(const char *filepath) {
     }
 
     theme_layer_free_strings(&global_layer);
-
-    if (!success) {
-        theme_layer_free_strings(&theme.top);
-        theme_layer_free_strings(&theme.body);
-        theme_layer_free_strings(&theme.bottom);
-        theme_layer_free_strings(&theme.highlight);
-    }
 
     toml_free(toml);
     return res;
