@@ -1,6 +1,3 @@
-[submodule "subprojects/raygui"]
-	path = subprojects/raygui
-	url = https://github.com/raysan5/raygui.git
 [submodule "subprojects/asprintf"]
 	path = subprojects/asprintf
 	url = https://github.com/Neved4/asprintf.git

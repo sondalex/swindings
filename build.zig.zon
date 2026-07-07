@@ -14,6 +14,10 @@
             .url = "https://github.com/sondalex/zig-download-zip/archive/refs/heads/main.tar.gz",
             .hash = "zig_download_zip-0.0.0-gPJu3w8jAAAuihuSJgmffFT7nr_VDgxA9wkb1HAL7xAk",
         },
+        .cargs = .{
+            .url = "git+https://github.com/sondalex/cargs.git?ref=zig_build_system_support#1fa499f9e5aa7aed0129cc2bd91e5166a337d825",
+            .hash = "cargs-1.2.1-alpha-S-pB7GRtAAB2RALEzaAJ78tP3vSDgMiusI9KrDujLTfn",
+        },
     },
     .paths = .{"."},
     .fingerprint = 0x2e0746e398ec10b0,
