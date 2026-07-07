@@ -39,7 +39,6 @@ const src_files = [_][]const u8{
 
 const deps_files = [_][]const u8{
     "subprojects/tomlc17/src/tomlc17.c",
-    "subprojects/cargs/src/cargs.c",
     "subprojects/fzy/src/match.c",
     "subprojects/asprintf/asprintf.c",
 };
@@ -132,10 +131,8 @@ fn getIncludePaths(b: *std.Build) !std.ArrayList(std.Build.LazyPath) {
 
     var include_paths: std.ArrayList(std.Build.LazyPath) = .empty;
     try include_paths.appendSlice(b.allocator, &.{
-        b.path("subprojects/raygui/src"),
         b.path("subprojects/asprintf"),
         b.path("subprojects/tomlc17/src"),
-        b.path("subprojects/cargs/include"),
         b.path("subprojects/fzy/src"),
     });
 
@@ -226,6 +223,14 @@ pub fn build(b: *std.Build) !void {
     // --- Step 7: Linking ---
     exe.root_module.linkLibrary(raylib);
     exe.root_module.linkSystemLibrary("m", .{});
+
+    const cargs_dep = b.dependency("cargs", .{
+        .target = target,
+        .optimize = optimize,
+    });
+    const cargs = cargs_dep.artifact("cargs");
+    exe.root_module.linkLibrary(cargs);
+
     b.installArtifact(exe);
 
     // Unit tests
