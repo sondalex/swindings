@@ -166,6 +166,10 @@ static Scroll scroll_create(float content_height, float window_height) {
 
 static void scroll_update(Scroll *s) {
     s->y += GetMouseWheelMove() * ROW_HEIGHT;
+    if (IsKeyPressed(KEY_PAGE_UP))
+        s->y += BODY_SECTION_HEIGHT;
+    if (IsKeyPressed(KEY_PAGE_DOWN))
+        s->y -= BODY_SECTION_HEIGHT;
     if (s->y > 0)
         s->y = 0;
     if (s->y < s->min)
@@ -362,6 +366,9 @@ void display(const KeyMapList *kml, const theme_t *theme) {
         float body_offset = TOP_SECTION_HEIGHT + scroll.y;
         scroll_update(&scroll);
         update_search_input(&search_state);
+
+        if (!search_state.active && IsKeyPressed(KEY_Q))
+            break;
 
         if (search_state.active && search_state.query_changed) {
             search(search_state.text, descriptions, search_state.type,
